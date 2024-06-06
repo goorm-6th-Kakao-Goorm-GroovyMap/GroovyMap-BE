@@ -23,7 +23,7 @@ public class PerformancePlaceController {
 
     // 전체 공연 장소 목록 요청을 받는 메서드
     @GetMapping("/performancePlace")
-    public ResponseEntity getPerformancePlaces() {
+    public ResponseEntity getPerformancePlacePosts() {
         /*
             프론트엔드에서 전체 공연 장소 목록을 요청할 때 백엔드에게 넘겨야 할 것이 있는가? = 없다
 
@@ -36,7 +36,7 @@ public class PerformancePlaceController {
             서비스의 전체 공연 장소 목록을 반환하는 메서드를 호출해서 값을 달라고 하는 것
         */
 
-        PerformancePlacePostsDto performancePlacePostsDto = performancePlaceService.getPerformancePlaces();
+        PerformancePlacePostsDto performancePlacePostsDto = performancePlaceService.getPerformancePlacePosts();
 
         return ResponseEntity.ok(performancePlacePostsDto);
     }

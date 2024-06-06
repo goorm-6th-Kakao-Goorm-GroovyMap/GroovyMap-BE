@@ -27,7 +27,7 @@ public class PerformancePlaceService {
         리포지토리에게 전체 공연 장소 목록 달라고 하면 됨
     */
 
-    public PerformancePlacePostsDto getPerformancePlaces() {
+    public PerformancePlacePostsDto getPerformancePlacePosts() {
         List<PerformancePlacePost> performancePlacePosts = performancePlaceRepository.findAll();
         // return performancePlacePosts;
 
