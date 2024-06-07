@@ -9,9 +9,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 @Entity
 @Getter
@@ -28,5 +25,5 @@ public class MediaFile {
     private String filePath;
     private String fileType;
 
-    private List<MultipartFile> mediaFiles;
+//    private List<MultipartFile> mediaFiles;
 }
