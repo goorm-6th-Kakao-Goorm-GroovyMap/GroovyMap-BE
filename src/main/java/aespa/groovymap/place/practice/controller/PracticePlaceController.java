@@ -16,6 +16,6 @@ public class PracticePlaceController {
     @GetMapping("/practiceplace")
     public ResponseEntity getPracticePlacePosts() {
         PracticePlacePostsDto practicePlacePostsDto = practicePlaceService.getPracticePlacePosts();
-        return ResponseEntity.ok(null);
+        return ResponseEntity.ok(practicePlacePostsDto);
     }
 }
