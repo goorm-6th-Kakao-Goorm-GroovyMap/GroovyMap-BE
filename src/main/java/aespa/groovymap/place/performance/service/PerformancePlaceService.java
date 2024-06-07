@@ -1,6 +1,8 @@
 package aespa.groovymap.place.performance.service;
 
+import aespa.groovymap.domain.Place;
 import aespa.groovymap.domain.post.PerformancePlacePost;
+import aespa.groovymap.place.performance.dto.PerformancePlacePostDto;
 import aespa.groovymap.place.performance.dto.PerformancePlacePostsDto;
 import aespa.groovymap.place.performance.repository.PerformancePlaceRepository;
 import java.util.List;
@@ -34,5 +36,28 @@ public class PerformancePlaceService {
         PerformancePlacePostsDto performancePlacePostsDto = new PerformancePlacePostsDto();
         performancePlacePostsDto.setPerformancePlacePosts(performancePlacePosts);
         return performancePlacePostsDto;
+    }
+
+    public Long savePerformancePlacePost(PerformancePlacePostDto performancePlacePostDto) {
+        PerformancePlacePost performancePlacePost = new PerformancePlacePost();
+
+        performancePlacePost.setCategory(performancePlacePost.getCategory());
+        performancePlacePost.setCoordinate(performancePlacePost.getCoordinate());
+        performancePlacePost.setPlace(makePlace(performancePlacePostDto));
+
+        return performancePlaceRepository.save(performancePlacePost).getId();
+    }
+
+    public Place makePlace(PerformancePlacePostDto performancePlacePostDto) {
+        Place place = new Place();
+
+        place.setName(performancePlacePostDto.getName());
+        place.setAddress(performancePlacePostDto.getAddress());
+        place.setRentalFee(performancePlacePostDto.getRentalFree());
+        place.setCapacity(performancePlacePostDto.getCapacity());
+        place.setPerformanceHours(performancePlacePostDto.getPerformanceHours());
+        place.setDescription(performancePlacePostDto.getDescription());
+
+        return place;
     }
 }

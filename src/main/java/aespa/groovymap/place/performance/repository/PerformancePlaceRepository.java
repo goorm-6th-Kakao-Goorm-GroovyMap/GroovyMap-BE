@@ -6,7 +6,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface PerformancePlaceRepository extends JpaRepository<PerformancePlacePost,Long> {
+public interface PerformancePlaceRepository extends JpaRepository<PerformancePlacePost, Long> {
     @Override
     List<PerformancePlacePost> findAll();
+
+    @Override
+    <S extends PerformancePlacePost> S save(S entity);
 }

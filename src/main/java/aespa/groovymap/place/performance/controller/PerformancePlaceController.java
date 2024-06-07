@@ -1,11 +1,14 @@
 package aespa.groovymap.place.performance.controller;
 
+import aespa.groovymap.place.performance.dto.PerformancePlacePostDto;
 import aespa.groovymap.place.performance.dto.PerformancePlacePostsDto;
 import aespa.groovymap.place.performance.service.PerformancePlaceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @Controller
 @RequiredArgsConstructor
@@ -19,7 +22,6 @@ public class PerformancePlaceController {
         공연 장소 목록 : performance place list
         List<PerformancePlacePost>
     */
-
 
     // 전체 공연 장소 목록 요청을 받는 메서드
     @GetMapping("/performancePlace")
@@ -40,5 +42,12 @@ public class PerformancePlaceController {
 
         return ResponseEntity.ok(performancePlacePostsDto);
     }
+
+    @PostMapping
+    public ResponseEntity savePerformancePlacePost(@RequestBody PerformancePlacePostDto performancePlacePostDto) {
+        Long performancePlacePostId = performancePlaceService.savePerformancePlacePost(performancePlacePostDto);
+        return ResponseEntity.ok(performancePlacePostId);
+    }
+
 
 }
