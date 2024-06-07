@@ -6,6 +6,7 @@ import aespa.groovymap.place.performance.service.PerformancePlaceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -48,6 +49,13 @@ public class PerformancePlaceController {
     public ResponseEntity savePerformancePlacePost(@RequestBody PerformancePlacePostDto performancePlacePostDto) {
         Long performancePlacePostId = performancePlaceService.savePerformancePlacePost(performancePlacePostDto);
         return ResponseEntity.ok(performancePlacePostId);
+    }
+
+    // 공연 장소 게시글 하나 요청 받는 메서드
+    @GetMapping("/performanceplace/{postId}")
+    public ResponseEntity getPerformancePlacePost(@PathVariable("postId") Long postId) {
+        PerformancePlacePostDto performancePlacePostDto = performancePlaceService.getPerformancePlacePost(postId);
+        return ResponseEntity.ok(performancePlacePostDto);
     }
 
 

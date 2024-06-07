@@ -6,6 +6,8 @@ import aespa.groovymap.place.performance.dto.PerformancePlacePostDto;
 import aespa.groovymap.place.performance.dto.PerformancePlacePostsDto;
 import aespa.groovymap.place.performance.repository.PerformancePlaceRepository;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,12 +57,43 @@ public class PerformancePlaceService {
         Place place = new Place();
 
         place.setName(performancePlacePostDto.getName());
+        place.setRegion(performancePlacePostDto.getRegion());
         place.setAddress(performancePlacePostDto.getAddress());
-        place.setRentalFee(performancePlacePostDto.getRentalFree());
+        place.setPhoneNumber(performancePlacePostDto.getPhoneNumber());
+        place.setRentalFee(performancePlacePostDto.getRentalFee());
         place.setCapacity(performancePlacePostDto.getCapacity());
         place.setPerformanceHours(performancePlacePostDto.getPerformanceHours());
         place.setDescription(performancePlacePostDto.getDescription());
 
         return place;
+    }
+
+    public PerformancePlacePostDto getPerformancePlacePost(Long postId) {
+        Optional<PerformancePlacePost> optionPerformancePlacePost = performancePlaceRepository.findById(postId);
+
+        PerformancePlacePost performancePlacePost = optionPerformancePlacePost.orElseThrow(
+                () -> new NoSuchElementException("Wrong Post Id"));
+
+        return makePerformancePlacePostDto(performancePlacePost);
+    }
+
+    private PerformancePlacePostDto makePerformancePlacePostDto(PerformancePlacePost performancePlacePost) {
+        PerformancePlacePostDto performancePlacePostDto = new PerformancePlacePostDto();
+
+        performancePlacePostDto.setCoordinate(performancePlacePost.getCoordinate());
+        performancePlacePostDto.setPart(performancePlacePost.getCategory());
+
+        Place place = performancePlacePost.getPlace();
+
+        performancePlacePostDto.setName(place.getName());
+        performancePlacePostDto.setRegion(place.getRegion());
+        performancePlacePostDto.setAddress(place.getAddress());
+        performancePlacePostDto.setPhoneNumber(place.getPhoneNumber());
+        performancePlacePostDto.setRentalFee(place.getRentalFee());
+        performancePlacePostDto.setCapacity(place.getCapacity());
+        performancePlacePostDto.setPerformanceHours(place.getPerformanceHours());
+        performancePlacePostDto.setDescription(place.getDescription());
+
+        return performancePlacePostDto;
     }
 }

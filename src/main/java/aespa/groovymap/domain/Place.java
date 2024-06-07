@@ -9,7 +9,9 @@ import lombok.Setter;
 @Setter
 public class Place {
     private String name;
+    private String region;
     private String address;
+    private String phoneNumber;
     private String rentalFee;
     private String capacity;
     private String performanceHours;

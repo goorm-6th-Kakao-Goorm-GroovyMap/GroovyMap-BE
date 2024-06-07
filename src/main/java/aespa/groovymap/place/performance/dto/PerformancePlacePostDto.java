@@ -12,7 +12,7 @@ public class PerformancePlacePostDto {
     private String region;
     private String address;
     private String phoneNumber;
-    private String rentalFree;
+    private String rentalFee;
     private String capacity;
     private String performanceHours;
     private String description;
