@@ -23,7 +23,7 @@ public class PerformancePlaceController {
         List<PerformancePlacePost>
     */
 
-    // 전체 공연 장소 목록 요청을 받는 메서드
+    // 전체 공연 장소 목록 요청 받는 메서드
     @GetMapping("/performancePlace")
     public ResponseEntity getPerformancePlacePosts() {
         /*
@@ -43,6 +43,7 @@ public class PerformancePlaceController {
         return ResponseEntity.ok(performancePlacePostsDto);
     }
 
+    // 공연 장소 게시글 저장 요청 받는 메서드
     @PostMapping
     public ResponseEntity savePerformancePlacePost(@RequestBody PerformancePlacePostDto performancePlacePostDto) {
         Long performancePlacePostId = performancePlaceService.savePerformancePlacePost(performancePlacePostDto);

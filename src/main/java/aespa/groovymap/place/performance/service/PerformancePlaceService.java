@@ -29,6 +29,7 @@ public class PerformancePlaceService {
         리포지토리에게 전체 공연 장소 목록 달라고 하면 됨
     */
 
+    // 전체 공연 장소 목록 반환
     public PerformancePlacePostsDto getPerformancePlacePosts() {
         List<PerformancePlacePost> performancePlacePosts = performancePlaceRepository.findAll();
         // return performancePlacePosts;
@@ -38,16 +39,18 @@ public class PerformancePlaceService {
         return performancePlacePostsDto;
     }
 
+    // 공연 장소 저장
     public Long savePerformancePlacePost(PerformancePlacePostDto performancePlacePostDto) {
         PerformancePlacePost performancePlacePost = new PerformancePlacePost();
 
-        performancePlacePost.setCategory(performancePlacePost.getCategory());
-        performancePlacePost.setCoordinate(performancePlacePost.getCoordinate());
+        performancePlacePost.setCategory(performancePlacePostDto.getPart());
+        performancePlacePost.setCoordinate(performancePlacePostDto.getCoordinate());
         performancePlacePost.setPlace(makePlace(performancePlacePostDto));
 
         return performancePlaceRepository.save(performancePlacePost).getId();
     }
 
+    // Place 객체 PerformancePlaceDto로부터 생성
     public Place makePlace(PerformancePlacePostDto performancePlacePostDto) {
         Place place = new Place();
 
