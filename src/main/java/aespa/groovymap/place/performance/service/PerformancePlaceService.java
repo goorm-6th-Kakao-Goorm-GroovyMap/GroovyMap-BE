@@ -5,9 +5,9 @@ import aespa.groovymap.domain.post.PerformancePlacePost;
 import aespa.groovymap.place.performance.dto.PerformancePlacePostDto;
 import aespa.groovymap.place.performance.dto.PerformancePlacePostsDto;
 import aespa.groovymap.place.performance.repository.PerformancePlaceRepository;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,10 +34,15 @@ public class PerformancePlaceService {
     // 전체 공연 장소 목록 반환
     public PerformancePlacePostsDto getPerformancePlacePosts() {
         List<PerformancePlacePost> performancePlacePosts = performancePlaceRepository.findAll();
-        // return performancePlacePosts;
+        List<PerformancePlacePostDto> performancePlacePostDtos = new ArrayList<>();
+
+        for (PerformancePlacePost performancePlacePost : performancePlacePosts) {
+            PerformancePlacePostDto performancePlacePostDto = convertToPerformancePlacePostDto(performancePlacePost);
+            performancePlacePostDtos.add(performancePlacePostDto);
+        }
 
         PerformancePlacePostsDto performancePlacePostsDto = new PerformancePlacePostsDto();
-        performancePlacePostsDto.setPerformancePlacePosts(performancePlacePosts);
+        performancePlacePostsDto.setPerformancePlacePosts(performancePlacePostDtos);
         return performancePlacePostsDto;
     }
 
@@ -47,13 +52,13 @@ public class PerformancePlaceService {
 
         performancePlacePost.setCategory(performancePlacePostDto.getPart());
         performancePlacePost.setCoordinate(performancePlacePostDto.getCoordinate());
-        performancePlacePost.setPlace(makePlace(performancePlacePostDto));
+        performancePlacePost.setPlace(convertToPlace(performancePlacePostDto));
 
         return performancePlaceRepository.save(performancePlacePost).getId();
     }
 
     // Place 객체 PerformancePlaceDto로부터 생성
-    public Place makePlace(PerformancePlacePostDto performancePlacePostDto) {
+    public Place convertToPlace(PerformancePlacePostDto performancePlacePostDto) {
         Place place = new Place();
 
         place.setName(performancePlacePostDto.getName());
@@ -68,16 +73,16 @@ public class PerformancePlaceService {
         return place;
     }
 
+    // id로 PerformancePlacePost 찾는 메서드
     public PerformancePlacePostDto getPerformancePlacePost(Long postId) {
-        Optional<PerformancePlacePost> optionPerformancePlacePost = performancePlaceRepository.findById(postId);
+        PerformancePlacePost performancePlacePost = performancePlaceRepository.findById(postId)
+                .orElseThrow(() -> new NoSuchElementException("Wrong Post Id"));
 
-        PerformancePlacePost performancePlacePost = optionPerformancePlacePost.orElseThrow(
-                () -> new NoSuchElementException("Wrong Post Id"));
-
-        return makePerformancePlacePostDto(performancePlacePost);
+        return convertToPerformancePlacePostDto(performancePlacePost);
     }
 
-    private PerformancePlacePostDto makePerformancePlacePostDto(PerformancePlacePost performancePlacePost) {
+    // PerformancePlacePost -> PerformancePlacePostDto 변환 메서드
+    private PerformancePlacePostDto convertToPerformancePlacePostDto(PerformancePlacePost performancePlacePost) {
         PerformancePlacePostDto performancePlacePostDto = new PerformancePlacePostDto();
 
         performancePlacePostDto.setCoordinate(performancePlacePost.getCoordinate());
