@@ -8,4 +8,7 @@ public interface PracticePlaceRepository extends JpaRepository<PracticePlacePost
 
     @Override
     List<PracticePlacePost> findAll();
+
+    @Override
+    <S extends PracticePlacePost> S save(S entity);
 }
