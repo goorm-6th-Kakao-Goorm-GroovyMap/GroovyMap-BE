@@ -7,6 +7,7 @@ import aespa.groovymap.place.practice.dto.PracticePlacePostsDto;
 import aespa.groovymap.place.practice.repository.PracticePlaceRepository;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -57,6 +58,15 @@ public class PracticePlaceService {
 
         return place;
     }
+
+    // id로 PracticePlacePost 찾기
+    public PracticePlacePostDto getPracticePlacePost(Long postId) {
+        PracticePlacePost practicePlacePost = practicePlaceRepository.findById(postId)
+                .orElseThrow(() -> new NoSuchElementException("Wrong Post Id"));
+
+        return convertToPracticePlacePostDto(practicePlacePost);
+    }
+
 
     // PracticePlacePost -> PracticePlacePostDto 변환
     public PracticePlacePostDto convertToPracticePlacePostDto(PracticePlacePost practicePlacePost) {
