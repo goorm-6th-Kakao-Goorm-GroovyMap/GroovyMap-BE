@@ -67,7 +67,7 @@ public class PerformancePlaceService {
         place.setPhoneNumber(performancePlacePostDto.getPhoneNumber());
         place.setRentalFee(performancePlacePostDto.getRentalFee());
         place.setCapacity(performancePlacePostDto.getCapacity());
-        place.setPerformanceHours(performancePlacePostDto.getPerformanceHours());
+        place.setHours(performancePlacePostDto.getPerformanceHours());
         place.setDescription(performancePlacePostDto.getDescription());
 
         return place;
@@ -96,7 +96,7 @@ public class PerformancePlaceService {
         performancePlacePostDto.setPhoneNumber(place.getPhoneNumber());
         performancePlacePostDto.setRentalFee(place.getRentalFee());
         performancePlacePostDto.setCapacity(place.getCapacity());
-        performancePlacePostDto.setPerformanceHours(place.getPerformanceHours());
+        performancePlacePostDto.setPerformanceHours(place.getHours());
         performancePlacePostDto.setDescription(place.getDescription());
 
         return performancePlacePostDto;

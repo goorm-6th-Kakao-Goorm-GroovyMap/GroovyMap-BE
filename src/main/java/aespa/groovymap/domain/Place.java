@@ -14,6 +14,6 @@ public class Place {
     private String phoneNumber;
     private String rentalFee;
     private String capacity;
-    private String performanceHours;
+    private String hours;
     private String description;
 }
