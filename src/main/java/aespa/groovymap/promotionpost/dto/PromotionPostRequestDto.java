@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import lombok.Builder;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 @Data
 @Builder
@@ -17,7 +18,7 @@ public class PromotionPostRequestDto {
     private Category part; // 유형
     private String region; // 활동지역명
     private String coordinates; // 좌표
-    private List<String> fileNames; // 첨부파일의 이름들
+    private List<MultipartFile> fileNames; // 첨부파일의 이름들
 
     public Coordinate getCoordinateObject() {
         // JSON 문자열을 Coordinate 객체로 변환하는 로직
