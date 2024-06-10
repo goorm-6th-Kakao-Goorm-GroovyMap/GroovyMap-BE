@@ -50,9 +50,9 @@ public class PromotionPostController {
     @PostMapping(value = "/write", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> writePost(@ModelAttribute PromotionPostResponseDto promotionPostResponseDto) {
         try {
-            PromotionPostRequestDto responseDto = promotionPostService.createPromotionPost(promotionPostResponseDto);
+            PromotionPostRequestDto requestDto = promotionPostService.createPromotionPost(promotionPostResponseDto);
             log.info("홍보게시판 게시글 등록 성공");
-            return new ResponseEntity<>(responseDto, HttpStatus.CREATED); // 201 Created
+            return new ResponseEntity<>(requestDto, HttpStatus.CREATED); // 201 Created
         } catch (Exception e) {
             log.error("홍보게시판 게시글 등록 실패", e);
             return new ResponseEntity<>("홍보게시판 게시글 등록 실패", HttpStatus.BAD_REQUEST);

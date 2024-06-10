@@ -47,14 +47,16 @@ public class PromotionPostService {
         // ID로 게시글을 조회하고, 없을 경우 예외를 던짐
         Optional<PromotionPost> result = promotionPostRepository.findByIdWithImages(id);
         PromotionPost promotionPost = result.orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
-        PromotionPostRequestDto promotionPostRequestDto = convertToDto(promotionPost);
 
-        // TODO: 조회수 증가 로직 구현
+        // 조회수 증가 로직 호출
+        increaseViewCount(promotionPost);
+
+        PromotionPostRequestDto promotionPostRequestDto = convertToDto(promotionPost);
 
         return promotionPostRequestDto;
     }
 
-    // PromotionPost 엔티티를 PromotionPostResponseDto로 변환하는 메서드
+    // PromotionPost 엔티티를 PromotionPostRequestDto로 변환하는 메서드
     private PromotionPostRequestDto convertToDto(PromotionPost savedPromotionPost) {
         PromotionPostRequestDto promotionPostRequestDto = PromotionPostRequestDto.builder()
                 .id(savedPromotionPost.getId())
@@ -82,12 +84,12 @@ public class PromotionPostService {
     // 홍보게시판 게시글 등록
     public PromotionPostRequestDto createPromotionPost(PromotionPostResponseDto promotionPostResponseDto) {
 
-        // RequestDto로부터 PromotionPost 객체 생성
+        // ResponseDto로부터 Coordinate 객체 생성
         Coordinate coordinate = promotionPostResponseDto.getCoordinateObject(); // 문자열을 객체로 변환
-        // RequestDto로부터 PromotionPost 객체 생성
+        // ResponseDto로부터 PromotionPost 객체 생성
         PromotionPost promotionPost = PromotionPost.builder()
                 .title(promotionPostResponseDto.getTitle())
-                //.author(promotionPostRequestDto.getAuthor()) // 작성자 정보는 로그인 기능 구현 후 추가
+                //.author(promotionPostResponseDto.getAuthor()) // 작성자 정보는 로그인 기능 구현 후 추가
                 .content(promotionPostResponseDto.getContent())
                 .category(promotionPostResponseDto.getPart())
                 .region(promotionPostResponseDto.getRegion())
@@ -99,8 +101,8 @@ public class PromotionPostService {
                 .build();
 
         // 이미지 파일이 있을 경우 이미지 추가 로직
-//        if (promotionPostRequestDto.getFileNames() != null) {
-//            promotionPostRequestDto.getFileNames().forEach(fileName -> {
+//        if (promotionPostResponseDto.getFileNames() != null) {
+//            promotionPostResponseDto.getFileNames().forEach(fileName -> {
 //                String[] arr = fileName.split("_");
 //                promotionPost.addImage(arr[0], arr[1], "C:/upload/" + fileName, "image");
 //            });
@@ -174,5 +176,11 @@ public class PromotionPostService {
         return promotionPostRepository.findByCategory(category).stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
+    }
+
+    // 홍보게시판 조회수 증가 메서드
+    private void increaseViewCount(PromotionPost promotionPost) {
+        promotionPost.setViewCount(promotionPost.getViewCount() + 1);
+        promotionPostRepository.save(promotionPost); // 변경사항을 데이터베이스에 저장
     }
 }
