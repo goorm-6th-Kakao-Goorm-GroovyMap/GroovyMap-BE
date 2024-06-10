@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class UpDownController {
 
-    private String uploadPath = "C:/upload"; // 업로드 경로
+    private String uploadPath = "C:\\upload"; // 업로드 경로
 
 //    @Operation(summary = "파일 업로드", description = "POST 방식으로 파일을 업로드합니다.")
 //    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -76,10 +76,10 @@ public class UpDownController {
 //    }
 
     @Operation(summary = "view 파일", description = "GET방식으로 첨부파일 조회")
-    @GetMapping("/view/{fileName}")
-    public ResponseEntity<Resource> viewFileGET(@PathVariable String fileName) {
+    @GetMapping("/view/{fileNames}")
+    public ResponseEntity<Resource> viewFileGET(@PathVariable String fileNames) {
 
-        Resource resource = new FileSystemResource(uploadPath + File.separator + fileName); // 파일 리소스 생성
+        Resource resource = new FileSystemResource(uploadPath + "\\" + fileNames); // 파일 리소스 생성
         String resourceName = resource.getFilename(); // 파일 이름 가져오기
         HttpHeaders headers = new HttpHeaders(); // HTTP 헤더 생성
 
@@ -93,10 +93,10 @@ public class UpDownController {
     }
 
     @Operation(summary = "remove 파일", description = "DELETE 방식으로 파일 삭제")
-    @DeleteMapping("/remove/{fileName}")
-    public Map<String, Boolean> removeFile(@PathVariable String fileName) {
+    @DeleteMapping("/remove/{fileNames}")
+    public Map<String, Boolean> removeFile(@PathVariable String fileNames) {
 
-        Resource resource = new FileSystemResource(uploadPath + File.separator + fileName); // 파일 리소스 생성
+        Resource resource = new FileSystemResource(uploadPath + File.separator + fileNames); // 파일 리소스 생성
         String resourceName = resource.getFilename(); // 파일 이름 가져오기
 
         Map<String, Boolean> resultMap = new HashMap<>(); // 결과 맵 생성
@@ -108,7 +108,7 @@ public class UpDownController {
 
             //섬네일이 존재한다면
             if (contentType.startsWith("image")) {
-                File thumbnailFile = new File(uploadPath + File.separator + "s_" + fileName);
+                File thumbnailFile = new File(uploadPath + File.separator + "s_" + fileNames);
                 thumbnailFile.delete(); // 섬네일 파일 삭제
             }
 
