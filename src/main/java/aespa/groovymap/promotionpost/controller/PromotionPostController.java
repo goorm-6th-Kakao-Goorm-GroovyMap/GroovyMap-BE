@@ -31,11 +31,11 @@ public class PromotionPostController {
     public ResponseEntity<?> getAllPosts() {
         try {
             // 서비스 레이어를 호출하여 모든 홍보 게시글을 조회
-            List<PromotionPostResponseDto> promotionPostResponseDtos = promotionPostService.findAll();
+            List<PromotionPostRequestDto> promotionPostRequestDtos = promotionPostService.findAll();
 
             // 조회된 게시글 목록을 HTTP 200 OK 상태와 함께 응답 본문으로 반환
             log.info("홍보게시판 게시글 조회 성공");
-            return ResponseEntity.ok().body(promotionPostResponseDtos);
+            return ResponseEntity.ok().body(promotionPostRequestDtos);
         } catch (Exception e) {
             // 예외 발생 시 로그 기록
             log.error("홍보게시판 게시글 조회 실패", e);
@@ -48,9 +48,9 @@ public class PromotionPostController {
     // 홍보게시판 게시글 등록
     @Operation(summary = "홍보 게시글 작성", description = "새로운 홍보 게시글을 작성합니다.")
     @PostMapping(value = "/write", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> writePost(@ModelAttribute PromotionPostRequestDto promotionPostRequestDto) {
+    public ResponseEntity<?> writePost(@ModelAttribute PromotionPostResponseDto promotionPostResponseDto) {
         try {
-            PromotionPostResponseDto responseDto = promotionPostService.createPromotionPost(promotionPostRequestDto);
+            PromotionPostRequestDto responseDto = promotionPostService.createPromotionPost(promotionPostResponseDto);
             log.info("홍보게시판 게시글 등록 성공");
             return new ResponseEntity<>(responseDto, HttpStatus.CREATED); // 201 Created
         } catch (Exception e) {
@@ -64,14 +64,27 @@ public class PromotionPostController {
     @GetMapping("/{postId}")
     public ResponseEntity<?> getPost(@PathVariable Long postId) {
         try {
-            PromotionPostResponseDto promotionPostResponseDto = promotionPostService.readOne(postId);
+            PromotionPostRequestDto promotionPostRequestDto = promotionPostService.readOne(postId);
             log.info("홍보게시판 게시글 조회 성공");
-            return ResponseEntity.ok().body(promotionPostResponseDto);
+            return ResponseEntity.ok().body(promotionPostRequestDto);
         } catch (Exception e) {
             log.error("홍보게시판 게시글 조회 실패", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("홍보게시판 게시글 조회 실패");
         }
     }
 
+    // 홍보게시판 목록 분야별 정렬
+    @Operation(summary = "홍보 게시글 분야별 조회", description = "특정 분야의 홍보 게시글을 조회합니다.")
+    @GetMapping("/part/{part}")
+    public ResponseEntity<?> getPostsByPart(@PathVariable String part) {
+        try {
+            List<PromotionPostRequestDto> promotionPostRequestDtos = promotionPostService.findByPart(part);
+            log.info("홍보게시판 게시글 분야별 조회 성공: part = {}", part);
+            return ResponseEntity.ok().body(promotionPostRequestDtos);
+        } catch (Exception e) {
+            log.error("홍보게시판 게시글 분야별 조회 실패: part = {}, error = {}", part, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 오류가 발생했습니다.");
+        }
+    }
 
 }

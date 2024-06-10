@@ -1,5 +1,6 @@
 package aespa.groovymap.promotionpost.service;
 
+import aespa.groovymap.domain.Category;
 import aespa.groovymap.domain.Coordinate;
 import aespa.groovymap.domain.post.PromotionPost;
 import aespa.groovymap.promotionpost.dto.PromotionPostRequestDto;
@@ -34,7 +35,7 @@ public class PromotionPostService {
     private final PromotionPostRepository promotionPostRepository;
 
     // 전체 홍보게시판 게시글 조회
-    public List<PromotionPostResponseDto> findAll() {
+    public List<PromotionPostRequestDto> findAll() {
         // 모든 게시글을 조회하고, DTO로 변환하여 리스트로 반환
         return promotionPostRepository.findAll().stream()
                 .map(this::convertToDto)
@@ -42,20 +43,20 @@ public class PromotionPostService {
     }
 
     // 게시글 단건 조회
-    public PromotionPostResponseDto readOne(Long id) {
+    public PromotionPostRequestDto readOne(Long id) {
         // ID로 게시글을 조회하고, 없을 경우 예외를 던짐
         Optional<PromotionPost> result = promotionPostRepository.findByIdWithImages(id);
         PromotionPost promotionPost = result.orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
-        PromotionPostResponseDto promotionPostResponseDto = convertToDto(promotionPost);
+        PromotionPostRequestDto promotionPostRequestDto = convertToDto(promotionPost);
 
         // TODO: 조회수 증가 로직 구현
 
-        return promotionPostResponseDto;
+        return promotionPostRequestDto;
     }
 
     // PromotionPost 엔티티를 PromotionPostResponseDto로 변환하는 메서드
-    private PromotionPostResponseDto convertToDto(PromotionPost savedPromotionPost) {
-        PromotionPostResponseDto promotionPostResponseDto = PromotionPostResponseDto.builder()
+    private PromotionPostRequestDto convertToDto(PromotionPost savedPromotionPost) {
+        PromotionPostRequestDto promotionPostRequestDto = PromotionPostRequestDto.builder()
                 .id(savedPromotionPost.getId())
                 .title(savedPromotionPost.getTitle())
                 .content(savedPromotionPost.getContent())
@@ -72,24 +73,24 @@ public class PromotionPostService {
         List<String> fileNames = savedPromotionPost.getImageSet().stream().sorted()
                 .map(boardImage -> boardImage.getFileName()).collect(Collectors.toList());
 
-        promotionPostResponseDto.setFileNames(fileNames);
-        return promotionPostResponseDto;
+        promotionPostRequestDto.setFileNames(fileNames);
+        return promotionPostRequestDto;
 
     }
 
 
     // 홍보게시판 게시글 등록
-    public PromotionPostResponseDto createPromotionPost(PromotionPostRequestDto promotionPostRequestDto) {
+    public PromotionPostRequestDto createPromotionPost(PromotionPostResponseDto promotionPostResponseDto) {
 
         // RequestDto로부터 PromotionPost 객체 생성
-        Coordinate coordinate = promotionPostRequestDto.getCoordinateObject(); // 문자열을 객체로 변환
+        Coordinate coordinate = promotionPostResponseDto.getCoordinateObject(); // 문자열을 객체로 변환
         // RequestDto로부터 PromotionPost 객체 생성
         PromotionPost promotionPost = PromotionPost.builder()
-                .title(promotionPostRequestDto.getTitle())
+                .title(promotionPostResponseDto.getTitle())
                 //.author(promotionPostRequestDto.getAuthor()) // 작성자 정보는 로그인 기능 구현 후 추가
-                .content(promotionPostRequestDto.getContent())
-                .category(promotionPostRequestDto.getPart())
-                .region(promotionPostRequestDto.getRegion())
+                .content(promotionPostResponseDto.getContent())
+                .category(promotionPostResponseDto.getPart())
+                .region(promotionPostResponseDto.getRegion())
                 .coordinate(coordinate)
                 .timestamp(ZonedDateTime.now()) // 현재 시간으로 설정
                 .likesCount(0) // 초기 좋아요 수 설정
@@ -104,11 +105,11 @@ public class PromotionPostService {
 //                promotionPost.addImage(arr[0], arr[1], "C:/upload/" + fileName, "image");
 //            });
 //        }
-        if (promotionPostRequestDto.getFileNames() != null) {
+        if (promotionPostResponseDto.getFileNames() != null) {
 
             final List<UploadResultDto> list = new ArrayList<>(); // 결과를 담을 리스트
 
-            promotionPostRequestDto.getFileNames().forEach(multipartFile -> {
+            promotionPostResponseDto.getFileNames().forEach(multipartFile -> {
                 String originalName = multipartFile.getOriginalFilename(); // 원본 파일 이름
                 log.info(originalName);
 
@@ -160,4 +161,18 @@ public class PromotionPostService {
     }
 
 
+    // 홍보게시판 게시글 분야별 조회
+    public List<PromotionPostRequestDto> findByPart(String part) {
+        // String part를 Category enum으로 변환
+        Category category;
+        try {
+            category = Category.valueOf(part.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("유효하지 않은 카테고리입니다: " + part);
+        }
+        // 분야별 게시글을 조회하고, DTO로 변환하여 리스트로 반환
+        return promotionPostRepository.findByCategory(category).stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
 }
