@@ -48,12 +48,17 @@ public class PromotionPostService {
         Optional<PromotionPost> result = promotionPostRepository.findByIdWithImages(id);
         PromotionPost promotionPost = result.orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
 
-        // 조회수 증가 로직 호출
-        increaseViewCount(promotionPost);
+        // 조회수 증가 메서드 호출
+        updateViews(id);
 
         PromotionPostRequestDto promotionPostRequestDto = convertToDto(promotionPost);
 
         return promotionPostRequestDto;
+    }
+
+    @Transactional
+    public int updateViews(Long id) {
+        return promotionPostRepository.updateViews(id);
     }
 
     // PromotionPost 엔티티를 PromotionPostRequestDto로 변환하는 메서드
@@ -179,8 +184,8 @@ public class PromotionPostService {
     }
 
     // 홍보게시판 조회수 증가 메서드
-    private void increaseViewCount(PromotionPost promotionPost) {
-        promotionPost.setViewCount(promotionPost.getViewCount() + 1);
-        promotionPostRepository.save(promotionPost); // 변경사항을 데이터베이스에 저장
-    }
+//    private void increaseViewCount(PromotionPost promotionPost) {
+//        promotionPost.setViewCount(promotionPost.getViewCount() + 1);
+//        promotionPostRepository.save(promotionPost); // 변경사항을 데이터베이스에 저장
+//    }
 }
