@@ -9,7 +9,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.web.multipart.MultipartFile;
 
 @Entity
 @Getter
@@ -18,7 +17,7 @@ public class MyPagePost extends Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private MultipartFile photoAndVideo;
+//    private MultipartFile photoAndVideo;
 
     @ManyToOne
     @JoinColumn(name = "my_page_member_content_id")
