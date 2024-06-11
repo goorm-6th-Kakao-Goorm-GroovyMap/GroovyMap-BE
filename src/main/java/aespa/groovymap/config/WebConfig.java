@@ -1,4 +1,4 @@
-package aespa.groovymap.promotionpost.global.config;
+package aespa.groovymap.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,4 +1,4 @@
-package aespa.groovymap.promotionpost.global.dto;
+package aespa.groovymap.upload.dto;
 
 import java.util.List;
 import lombok.Data;
