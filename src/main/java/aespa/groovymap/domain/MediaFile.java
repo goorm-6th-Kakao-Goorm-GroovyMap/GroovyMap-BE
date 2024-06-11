@@ -28,5 +28,5 @@ public class MediaFile {
     private String filePath;
     private String fileType;
 
-    private List<MultipartFile> mediaFiles;
+//    private List<MultipartFile> mediaFiles;
 }

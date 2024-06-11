@@ -6,9 +6,16 @@ import jakarta.persistence.*;
 
 import java.time.ZonedDateTime;
 import java.util.List;
-import lombok.Getter;
-import lombok.Setter;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
+
+@NoArgsConstructor
+@AllArgsConstructor
+@SuperBuilder
 @Entity
 @Getter
 @Setter
@@ -23,6 +30,8 @@ public class Post {
     private Member author;
 
     private String title;
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String content;
     private Integer likesCount;
     private Integer savesCount;
@@ -32,6 +41,4 @@ public class Post {
     private List<Comment> comments;
 
     private ZonedDateTime timestamp;
-
-
 }
