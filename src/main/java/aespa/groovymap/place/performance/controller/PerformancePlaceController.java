@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
+//@CrossOrigin(origins = {"https://172c-220-81-161-52.ngrok-free.app", "http://localhost:3000"})
 public class PerformancePlaceController {
 
     private final PerformancePlaceService performancePlaceService;
