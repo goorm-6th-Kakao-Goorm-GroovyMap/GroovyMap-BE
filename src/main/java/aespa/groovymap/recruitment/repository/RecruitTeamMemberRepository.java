@@ -14,7 +14,7 @@ public interface RecruitTeamMemberRepository extends JpaRepository<RecruitTeamMe
     int updateViews(@Param("id") Long id);
 
     @Modifying
-    @Query("update RecruitTeamMemberPost p set p.likeCount = p.likeCount + 1 where p.id = :id")
+    @Query("update RecruitTeamMemberPost p set p.likesCount = p.likesCount + 1 where p.id = :id")
     int incrementLikes(@Param("id") Long id);
 }
 
