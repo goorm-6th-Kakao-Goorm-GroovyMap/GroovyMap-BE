@@ -1,11 +1,11 @@
-package aespa.groovymap.place.practice.dto;
+package aespa.groovymap.place.performance.dto;
 
 import aespa.groovymap.domain.Category;
 import aespa.groovymap.domain.Coordinate;
 import lombok.Data;
 
 @Data
-public class PracticePlacePostDto {
+public class PerformancePlacePostRequestDto {
     private String name;
     private Category part;
     private Coordinate coordinate;
@@ -14,6 +14,6 @@ public class PracticePlacePostDto {
     private String phoneNumber;
     private String rentalFee;
     private String capacity;
-    private String practiceHours;
+    private String performanceHours;
     private String description;
 }
