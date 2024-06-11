@@ -50,6 +50,8 @@ public class PromotionPostService {
 
         // 조회수 증가 메서드 호출
         updateViews(id);
+        // 변경된 조회수를 적용하여 DTO 생성
+        promotionPost.setViewCount(promotionPost.getViewCount() + 1);
 
         PromotionPostRequestDto promotionPostRequestDto = convertToDto(promotionPost);
 
