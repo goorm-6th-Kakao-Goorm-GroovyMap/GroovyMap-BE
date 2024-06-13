@@ -7,6 +7,8 @@ import aespa.groovymap.promotionpost.dto.PromotionPostRequestDto;
 import aespa.groovymap.promotionpost.dto.PromotionPostResponseDto;
 import aespa.groovymap.promotionpost.repository.PromotionPostRepository;
 import aespa.groovymap.upload.dto.UploadResultDto;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -92,7 +94,7 @@ public class PromotionPostService {
     public PromotionPostRequestDto createPromotionPost(PromotionPostResponseDto promotionPostResponseDto) {
 
         // ResponseDto로부터 Coordinate 객체 생성
-        Coordinate coordinate = promotionPostResponseDto.getCoordinateObject(); // 문자열을 객체로 변환
+        Coordinate coordinate = getCoordinateObject(promotionPostResponseDto.getCoordinates()); // 문자열을 객체로 변환
         // ResponseDto로부터 PromotionPost 객체 생성
         PromotionPost promotionPost = PromotionPost.builder()
                 .title(promotionPostResponseDto.getTitle())
@@ -132,14 +134,21 @@ public class PromotionPostService {
                 Path savePath = Paths.get(uploadPath, uuid + "_" + originalName); // 저장 경로 설정
 
                 boolean image = false; // 이미지 여부 확인
+                boolean video = false; // 비디오 여부 확인
 
                 try {
                     multipartFile.transferTo(savePath); // 파일 저장
 
-                    // 이미지 파일인지 확인
-                    if (Files.probeContentType(savePath).startsWith("image")) {
+                    // 파일 타입 확인
+                    String fileType = Files.probeContentType(savePath);
+                    if (fileType.startsWith("image")) {
                         image = true;
+                    } else if (fileType.startsWith("video")) {
+                        video = true;
+                    }
 
+                    // 이미지 파일 추가 로직
+                    if (image) {
                         // 이미지 추가 로직
                         promotionPost.addImage(uuid, originalName, savePath.toString(), multipartFile.getContentType());
 
@@ -147,6 +156,13 @@ public class PromotionPostService {
                         File thumbFile = new File(uploadPath, "s_" + uuid + "_" + originalName);
                         Thumbnailator.createThumbnail(savePath.toFile(), thumbFile, 200, 200);
                     }
+
+                    // 비디오 파일 추가 로직
+                    if (video) {
+                        // 비디오 추가 로직
+                        promotionPost.addImage(uuid, originalName, savePath.toString(), multipartFile.getContentType());
+                    }
+
                 } catch (IOException e) {
                     log.error("파일 저장 중 오류 발생: {}", e.getMessage());
                     throw new RuntimeException("파일 저장 중 오류가 발생했습니다."); // 예외 발생 시 런타임 예외 던짐
@@ -185,9 +201,13 @@ public class PromotionPostService {
                 .collect(Collectors.toList());
     }
 
-    // 홍보게시판 조회수 증가 메서드
-//    private void increaseViewCount(PromotionPost promotionPost) {
-//        promotionPost.setViewCount(promotionPost.getViewCount() + 1);
-//        promotionPostRepository.save(promotionPost); // 변경사항을 데이터베이스에 저장
-//    }
+    public Coordinate getCoordinateObject(String coordinates) {
+        // JSON 문자열을 Coordinate 객체로 변환하는 로직
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.readValue(coordinates, Coordinate.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to parse coordinate", e);
+        }
+    }
 }
