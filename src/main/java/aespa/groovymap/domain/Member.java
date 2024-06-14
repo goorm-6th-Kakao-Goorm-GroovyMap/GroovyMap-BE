@@ -31,12 +31,16 @@ public class Member {
     private String email;
     private String password;
     private String nickname;
+    private String region;
 
     @Embedded
     private Coordinate coordinate;
 
     @Enumerated(EnumType.STRING)
     private Type type;
+
+    @Enumerated(EnumType.STRING)
+    private Category category;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "member_content_id")
