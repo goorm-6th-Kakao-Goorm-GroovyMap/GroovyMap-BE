@@ -52,5 +52,6 @@ public class Post {
 
     private ZonedDateTime timestamp;
 
-
+    @ManyToOne
+    private Post post;
 }

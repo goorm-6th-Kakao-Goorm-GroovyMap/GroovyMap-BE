@@ -33,12 +33,12 @@ public class RecruitTeamMemberService {
         return RecruitTeamMemberRequestDto.builder()
                 .id(recruitTeamMemberPost.getId()) // 아이디 설정
                 .title(recruitTeamMemberPost.getTitle()) // 제목 설정
-//                .author(recruitTeamMemberPost.getAuthor()) // 글쓴이 설정
+                .author(recruitTeamMemberPost.getAuthor()) // 글쓴이 설정
                 .content(recruitTeamMemberPost.getContent()) // 내용 설정
                 .region(recruitTeamMemberPost.getRegion()) // 활동지역명 설정
                 .field(recruitTeamMemberPost.getCategory()) // 분야 설정
                 .part(recruitTeamMemberPost.getType()) // 유형 설정
-                .coordinates(recruitTeamMemberPost.getCoordinate()) // 좌표 설정
+//                .coordinates(recruitTeamMemberPost.getCoordinate()) // 좌표 설정
                 .recruitNum(recruitTeamMemberPost.getRecruitNum()) // 모집 인원 설정
                 .timeStamp(recruitTeamMemberPost.getTimestamp()) // 날짜 설정
                 .viewCount(recruitTeamMemberPost.getViewCount()) // 조회수 설정
@@ -59,26 +59,23 @@ public class RecruitTeamMemberService {
     // 팀원 모집 게시글 등록
     public RecruitTeamMemberRequestDto createRecruitTeamMember(RecruitTeamMemberResponseDto recruitTeamMemberResponseDto) {
         // ResponseDto로부터 RecruitTeamMemberPost 객체 생성
-        Coordinate coordinate = recruitTeamMemberResponseDto.getCoordinateObject();// 문자열을 객체로 변환
+//        Coordinate coordinate = recruitTeamMemberResponseDto.getCoordinateObject();// 문자열을 객체로 변환
         // RequestDto로부터 RecruitTeamMemberPost 객체 생성
         RecruitTeamMemberPost recruitTeamMemberPost = RecruitTeamMemberPost.builder()
-//                .author(recruitTeamMemberResponseDto.getAuthor())
+                .author(recruitTeamMemberResponseDto.getAuthor())
                 .title(recruitTeamMemberResponseDto.getTitle())
                 .content(recruitTeamMemberResponseDto.getContent())
-                .type(recruitTeamMemberResponseDto.getPart())
-                .category(recruitTeamMemberResponseDto.getField())
                 .region(recruitTeamMemberResponseDto.getRegion())
+                .category(recruitTeamMemberResponseDto.getField())
+                .type(recruitTeamMemberResponseDto.getPart())
                 .recruitNum(recruitTeamMemberResponseDto.getRecruitNum())
-                .coordinate(coordinate)
-                .timestamp(ZonedDateTime.now()) // 현재 시간으로 설정
-                .viewCount(0) // 초기 조회 수 설정
+                .timestamp(ZonedDateTime.now())
+//                .coordinate(coordinate)
+                .viewCount(0)
                 .build();
 
-        // 생성된 RecruitTeamMemberPost 객체를 저장
-        RecruitTeamMemberPost savedRecruitTeamMemberPost = recruitTeamMemberRepository.save(recruitTeamMemberPost);
-
-        // 저장된 객체를 DTO로 변환하여 반환
-        return convertToDto(savedRecruitTeamMemberPost);
+        recruitTeamMemberPost = recruitTeamMemberRepository.save(recruitTeamMemberPost);
+        return convertToDto(recruitTeamMemberPost);
     }
 
     // 팀원 모집 게시글 단건 조회
