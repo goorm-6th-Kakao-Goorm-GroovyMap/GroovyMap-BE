@@ -6,25 +6,20 @@ import aespa.groovymap.domain.post.PromotionPost;
 import aespa.groovymap.promotionpost.dto.PromotionPostRequestDto;
 import aespa.groovymap.promotionpost.dto.PromotionPostResponseDto;
 import aespa.groovymap.promotionpost.repository.PromotionPostRepository;
+import aespa.groovymap.upload.dto.UploadFileDto;
 import aespa.groovymap.upload.dto.UploadResultDto;
+import aespa.groovymap.upload.service.UpDownService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.coobird.thumbnailator.Thumbnailator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @Service
@@ -35,6 +30,7 @@ public class PromotionPostService {
     private String uploadPath = "C:/upload"; // 업로드 경로
 
     private final PromotionPostRepository promotionPostRepository;
+    private final UpDownService upDownService;
 
     // 전체 홍보게시판 게시글 조회
     public List<PromotionPostRequestDto> findAll() {
@@ -110,71 +106,13 @@ public class PromotionPostService {
                 .build();
 
         // 이미지 파일이 있을 경우 이미지 추가 로직
-//        if (promotionPostResponseDto.getFileNames() != null) {
-//            promotionPostResponseDto.getFileNames().forEach(fileName -> {
-//                String[] arr = fileName.split("_");
-//                promotionPost.addImage(arr[0], arr[1], "C:/upload/" + fileName, "image");
-//            });
-//        }
-        if (promotionPostResponseDto.getFileNames() != null) {
+        if (promotionPostResponseDto.getFileNames() != null && !promotionPostResponseDto.getFileNames().isEmpty()) {
+            List<MultipartFile> multipartFiles = promotionPostResponseDto.getFileNames();
+            UploadFileDto uploadFileDto = new UploadFileDto(multipartFiles);
+            List<UploadResultDto> uploadResults = upDownService.uploadFiles(uploadFileDto);
 
-            final List<UploadResultDto> list = new ArrayList<>(); // 결과를 담을 리스트
-
-            promotionPostResponseDto.getFileNames().forEach(multipartFile -> {
-                String originalName = multipartFile.getOriginalFilename(); // 원본 파일 이름
-                log.info(originalName);
-
-                if (originalName == null || originalName.isEmpty()) {
-                    log.warn("파일 이름이 유효하지 않습니다.");
-                    return; // 파일 이름이 유효하지 않으면 처리하지 않음
-                }
-
-                String uuid = UUID.randomUUID().toString(); // UUID 생성
-
-                Path savePath = Paths.get(uploadPath, uuid + "_" + originalName); // 저장 경로 설정
-
-                boolean image = false; // 이미지 여부 확인
-                boolean video = false; // 비디오 여부 확인
-
-                try {
-                    multipartFile.transferTo(savePath); // 파일 저장
-
-                    // 파일 타입 확인
-                    String fileType = Files.probeContentType(savePath);
-                    if (fileType.startsWith("image")) {
-                        image = true;
-                    } else if (fileType.startsWith("video")) {
-                        video = true;
-                    }
-
-                    // 이미지 파일 추가 로직
-                    if (image) {
-                        // 이미지 추가 로직
-                        promotionPost.addImage(uuid, originalName, savePath.toString(), multipartFile.getContentType());
-
-                        // 이미지 파일이면 썸네일 생성
-                        File thumbFile = new File(uploadPath, "s_" + uuid + "_" + originalName);
-                        Thumbnailator.createThumbnail(savePath.toFile(), thumbFile, 200, 200);
-                    }
-
-                    // 비디오 파일 추가 로직
-                    if (video) {
-                        // 비디오 추가 로직
-                        promotionPost.addImage(uuid, originalName, savePath.toString(), multipartFile.getContentType());
-                    }
-
-                } catch (IOException e) {
-                    log.error("파일 저장 중 오류 발생: {}", e.getMessage());
-                    throw new RuntimeException("파일 저장 중 오류가 발생했습니다."); // 예외 발생 시 런타임 예외 던짐
-                }
-
-                // 결과 리스트에 추가
-//                list.add(UploadResultDto.builder()
-//                        .fileName(uuid + "_" + originalName)
-//                        .img(image)
-//                        .filePath(savePath.toString())
-//                        .fileType(multipartFile.getContentType())
-//                        .build());
+            uploadResults.forEach(result -> {
+                promotionPost.addImage(result.getFileName(), result.getFilePath(), result.getFileType());
             });
         }
 
