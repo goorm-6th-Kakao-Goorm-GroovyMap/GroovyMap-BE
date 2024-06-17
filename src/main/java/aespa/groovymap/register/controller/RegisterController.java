@@ -1,7 +1,8 @@
 package aespa.groovymap.register.controller;
 
-import aespa.groovymap.register.dto.NicknameRequestDto;
-import aespa.groovymap.register.dto.NicknameResponseDto;
+import aespa.groovymap.register.dto.AvailableDto;
+import aespa.groovymap.register.dto.EmailDto;
+import aespa.groovymap.register.dto.NicknameDto;
 import aespa.groovymap.register.service.RegisterService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,10 +16,20 @@ public class RegisterController {
     private final RegisterService registerService;
 
     @PostMapping("/register/nickname-check")
-    public ResponseEntity nicknameCheck(NicknameRequestDto nicknameRequestDto) {
-        Boolean available = registerService.nicknameCheck(nicknameRequestDto.getNickname());
-        NicknameResponseDto nicknameResponseDto = new NicknameResponseDto();
-        nicknameResponseDto.setAvailable(available);
-        return ResponseEntity.ok(nicknameResponseDto);
+    public ResponseEntity nicknameCheck(NicknameDto nicknameDto) {
+        Boolean available = registerService.nicknameCheck(nicknameDto.getNickname());
+        return ResponseEntity.ok(makeAvailableDto(available));
+    }
+
+    @PostMapping("/register/email-check")
+    public ResponseEntity emailCheck(EmailDto emailDto) {
+        Boolean available = registerService.emailCheck(emailDto.getEmail());
+        return ResponseEntity.ok(makeAvailableDto(available));
+    }
+
+    public AvailableDto makeAvailableDto(Boolean available) {
+        AvailableDto availableDto = new AvailableDto();
+        availableDto.setAvailable(available);
+        return availableDto;
     }
 }

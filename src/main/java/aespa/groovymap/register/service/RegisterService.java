@@ -14,4 +14,8 @@ public class RegisterService {
     public Boolean nicknameCheck(String nickname) {
         return !memberRepository.findByNickname(nickname).isPresent();
     }
+
+    public Boolean emailCheck(String email) {
+        return !memberRepository.findByEmail(email).isPresent();
+    }
 }

@@ -3,6 +3,6 @@ package aespa.groovymap.register.dto;
 import lombok.Data;
 
 @Data
-public class NicknameRequestDto {
-    private String nickname;
+public class EmailDto {
+    private String email;
 }
