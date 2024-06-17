@@ -9,8 +9,10 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.SessionAttribute;
 
 @Controller
 @RequiredArgsConstructor
@@ -38,5 +40,15 @@ public class LoginController {
             session.invalidate();
         }
         return ResponseEntity.ok().body("logout complete");
+    }
+
+    @GetMapping("/login/test")
+    public ResponseEntity loginTest(
+            @SessionAttribute(name = SessionConstants.MEMBER_ID, required = false) Long memberId) {
+        if (memberId != null) {
+            return ResponseEntity.ok(memberId);
+        } else {
+            return ResponseEntity.ok("session end");
+        }
     }
 }
