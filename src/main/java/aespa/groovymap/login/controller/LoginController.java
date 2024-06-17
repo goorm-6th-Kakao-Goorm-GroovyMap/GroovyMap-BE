@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @Controller
 @RequiredArgsConstructor
@@ -18,7 +19,7 @@ public class LoginController {
     private final LoginService loginService;
 
     @PostMapping("/login")
-    public ResponseEntity login(LoginDto loginDto, HttpServletRequest request) {
+    public ResponseEntity login(@RequestBody LoginDto loginDto, HttpServletRequest request) {
         Member loginMember = loginService.login(loginDto.getEmail(), loginDto.getPassword());
 
         if (loginMember == null) {

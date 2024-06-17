@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @Controller
 @RequiredArgsConstructor
@@ -16,13 +17,13 @@ public class RegisterController {
     private final RegisterService registerService;
 
     @PostMapping("/register/nickname-check")
-    public ResponseEntity nicknameCheck(NicknameDto nicknameDto) {
+    public ResponseEntity nicknameCheck(@RequestBody NicknameDto nicknameDto) {
         Boolean available = registerService.nicknameCheck(nicknameDto.getNickname());
         return ResponseEntity.ok(makeAvailableDto(available));
     }
 
     @PostMapping("/register/email-check")
-    public ResponseEntity emailCheck(EmailDto emailDto) {
+    public ResponseEntity emailCheck(@RequestBody EmailDto emailDto) {
         Boolean available = registerService.emailCheck(emailDto.getEmail());
         return ResponseEntity.ok(makeAvailableDto(available));
     }
