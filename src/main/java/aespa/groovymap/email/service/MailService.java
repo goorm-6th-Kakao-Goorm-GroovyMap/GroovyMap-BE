@@ -19,11 +19,13 @@ public class MailService {
 
     private final JavaMailSender javaMailSender;
     private final RedisUtil redisUtil;
-    private static String certificationCode;
 
-    private void createCertificationCode() {
+    private static final String FROM_EMAIL = "choijun0627@gmail.com";
+    private static final String EMAIL_SUBJECT = "GroovyMap 회원 가입 인증 번호";
+    private static final long CERTIFICATION_CODE_EXPIRE_TIME = 60 * 3L; // 3분
+
+    private String createCertificationCode() {
         int certificationCodeLength = 6;
-
         Random random = new Random();
         StringBuilder builder = new StringBuilder();
 
@@ -31,51 +33,38 @@ public class MailService {
             builder.append(random.nextInt(10));
         }
 
-        certificationCode = builder.toString();
+        return builder.toString();
     }
 
-    public MimeMessage createMail(String email) {
-        createCertificationCode();
-
+    private MimeMessage createMimeMessage(String email, String certificationCode) throws MessagingException {
         MimeMessage message = javaMailSender.createMimeMessage();
+        String emailContent = "<h3>요청하신 인증 번호입니다.</h3>"
+                + "<h1>" + certificationCode + "</h1>"
+                + "<h3>감사합니다.</h3>";
 
-        String fromMail = "choijun0627@gmail.com";
-        String toMail = email;
-        String emailTitle = "GroovyMap 회원 가입 인증 번호";
-        String emailContent = "";
-        emailContent += "<h3>" + "요청하신 인증 번호입니다." + "</h3>";
-        emailContent += "<h1>" + certificationCode + "</h1>";
-        emailContent += "<h3>" + "감사합니다." + "</h3>";
-
-        try {
-            message.setFrom(fromMail);
-            message.setRecipients(RecipientType.TO, toMail);
-            message.setSubject(emailTitle);
-            message.setText(emailContent, "UTF-8", "html");
-        } catch (MessagingException messagingException) {
-            log.error("이메일 전송 관련 예외 발생. 수신 이메일: {}, 예외: {}", toMail, messagingException);
-        }
-
-        // Redis에 해당 인증 코드 인증 시간 3분으로 설정
-        redisUtil.setDataExpire(certificationCode, toMail, 60 * 3L);
+        message.setFrom(FROM_EMAIL);
+        message.setRecipients(RecipientType.TO, email);
+        message.setSubject(EMAIL_SUBJECT);
+        message.setText(emailContent, "UTF-8", "html");
 
         return message;
     }
 
     public void sendEmail(String email) {
-        MimeMessage message = createMail(email);
-        javaMailSender.send(message);
+        String certificationCode = createCertificationCode();
+        try {
+            MimeMessage message = createMimeMessage(email, certificationCode);
+            javaMailSender.send(message);
+            // Redis에 해당 인증 코드와 이메일을 인증 시간 3분으로 설정
+            redisUtil.setDataExpire(certificationCode, email, CERTIFICATION_CODE_EXPIRE_TIME);
+        } catch (MessagingException e) {
+            log.error("이메일 전송 관련 예외 발생. 수신 이메일: {}, 예외: {}", email, e);
+            throw new RuntimeException("이메일 전송 중 문제가 발생했습니다.");
+        }
     }
 
     public Boolean checkCertificationCode(String email, String certificationCode) {
-        System.out.println(redisUtil.getData(certificationCode));
-        System.out.println(email);
-        if (redisUtil.getData(certificationCode) == null) {
-            return false;
-        } else if (redisUtil.getData(certificationCode).equals(email)) {
-            return true;
-        } else {
-            return false;
-        }
+        String storedEmail = redisUtil.getData(certificationCode);
+        return email.equals(storedEmail);
     }
 }
