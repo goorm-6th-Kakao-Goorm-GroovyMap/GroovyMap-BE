@@ -6,5 +6,5 @@ import lombok.Data;
 
 @Data
 public class PracticePlacePostsDto {
-    private List<PracticePlacePostDto> practicePlacePosts = new ArrayList<>();
+    private List<PracticePlacePostResponseDto> practicePlacePosts = new ArrayList<>();
 }

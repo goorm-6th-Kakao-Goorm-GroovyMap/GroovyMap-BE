@@ -1,6 +1,8 @@
 package aespa.groovymap.place.performance.controller;
 
-import aespa.groovymap.place.performance.dto.PerformancePlacePostDto;
+import aespa.groovymap.place.performance.dto.PerformancePlacePostIdDto;
+import aespa.groovymap.place.performance.dto.PerformancePlacePostRequestDto;
+import aespa.groovymap.place.performance.dto.PerformancePlacePostResponseDto;
 import aespa.groovymap.place.performance.dto.PerformancePlacePostsDto;
 import aespa.groovymap.place.performance.service.PerformancePlaceService;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-//@CrossOrigin(origins = {"https://172c-220-81-161-52.ngrok-free.app", "http://localhost:3000"})
 public class PerformancePlaceController {
 
     private final PerformancePlaceService performancePlaceService;
@@ -47,16 +48,20 @@ public class PerformancePlaceController {
 
     // 공연 장소 게시글 저장 요청 받는 메서드
     @PostMapping("/performanceplace")
-    public ResponseEntity savePerformancePlacePost(@RequestBody PerformancePlacePostDto performancePlacePostDto) {
-        Long performancePlacePostId = performancePlaceService.savePerformancePlacePost(performancePlacePostDto);
-        return ResponseEntity.ok(performancePlacePostId);
+    public ResponseEntity savePerformancePlacePost(
+            @RequestBody PerformancePlacePostRequestDto performancePlacePostRequestDto) {
+        Long performancePlacePostId = performancePlaceService.savePerformancePlacePost(performancePlacePostRequestDto);
+        PerformancePlacePostIdDto performancePlacePostIdDto = new PerformancePlacePostIdDto();
+        performancePlacePostIdDto.setId(performancePlacePostId);
+        return ResponseEntity.ok(performancePlacePostIdDto);
     }
 
     // 공연 장소 게시글 하나 요청 받는 메서드
     @GetMapping("/performanceplace/{postId}")
     public ResponseEntity getPerformancePlacePost(@PathVariable("postId") Long postId) {
-        PerformancePlacePostDto performancePlacePostDto = performancePlaceService.getPerformancePlacePost(postId);
-        return ResponseEntity.ok(performancePlacePostDto);
+        PerformancePlacePostResponseDto performancePlacePostResponseDto = performancePlaceService.getPerformancePlacePost(
+                postId);
+        return ResponseEntity.ok(performancePlacePostResponseDto);
     }
 
 
