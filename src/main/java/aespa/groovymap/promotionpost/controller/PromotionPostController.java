@@ -1,5 +1,6 @@
 package aespa.groovymap.promotionpost.controller;
 
+import aespa.groovymap.config.SessionConstants;
 import aespa.groovymap.promotionpost.dto.PromotionPostRequestDto;
 import aespa.groovymap.promotionpost.dto.PromotionPostResponseDto;
 import aespa.groovymap.promotionpost.service.PromotionPostService;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.SessionAttribute;
 
 @RestController
 @RequiredArgsConstructor
@@ -48,9 +50,16 @@ public class PromotionPostController {
     // 홍보게시판 게시글 등록
     @Operation(summary = "홍보 게시글 작성", description = "새로운 홍보 게시글을 작성합니다.")
     @PostMapping(value = "/write", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> writePost(@ModelAttribute PromotionPostResponseDto promotionPostResponseDto) {
+    public ResponseEntity<?> writePost(@ModelAttribute PromotionPostResponseDto promotionPostResponseDto,
+                                       @SessionAttribute(name = SessionConstants.MEMBER_ID, required = false) Long memberId) {
+
+        if (memberId == null) {
+            return new ResponseEntity<>("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED); // 401 Unauthorized
+        }
+
         try {
-            PromotionPostRequestDto requestDto = promotionPostService.createPromotionPost(promotionPostResponseDto);
+            PromotionPostRequestDto requestDto = promotionPostService.createPromotionPost(promotionPostResponseDto,
+                    memberId);
             log.info("홍보게시판 게시글 등록 성공");
             return new ResponseEntity<>(requestDto, HttpStatus.CREATED); // 201 Created
         } catch (Exception e) {

@@ -13,7 +13,7 @@ public class PromotionPostRequestDto {
     private Long id;
     private String title; // 제목
     private String content; // 내용
-    // private Member author; // 작성자
+    private String author; // 작성자
     private Category part; // 유형
     private String region; // 활동지역명
     private Coordinate coordinates; // 좌표

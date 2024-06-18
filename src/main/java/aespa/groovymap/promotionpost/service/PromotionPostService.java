@@ -2,10 +2,12 @@ package aespa.groovymap.promotionpost.service;
 
 import aespa.groovymap.domain.Category;
 import aespa.groovymap.domain.Coordinate;
+import aespa.groovymap.domain.Member;
 import aespa.groovymap.domain.post.PromotionPost;
 import aespa.groovymap.promotionpost.dto.PromotionPostRequestDto;
 import aespa.groovymap.promotionpost.dto.PromotionPostResponseDto;
 import aespa.groovymap.promotionpost.repository.PromotionPostRepository;
+import aespa.groovymap.repository.MemberRepository;
 import aespa.groovymap.upload.dto.UploadFileDto;
 import aespa.groovymap.upload.dto.UploadResultDto;
 import aespa.groovymap.upload.service.UpDownService;
@@ -31,6 +33,7 @@ public class PromotionPostService {
 
     private final PromotionPostRepository promotionPostRepository;
     private final UpDownService upDownService;
+    private final MemberRepository memberRepository;
 
     // 전체 홍보게시판 게시글 조회
     public List<PromotionPostRequestDto> findAll() {
@@ -66,6 +69,7 @@ public class PromotionPostService {
         PromotionPostRequestDto promotionPostRequestDto = PromotionPostRequestDto.builder()
                 .id(savedPromotionPost.getId())
                 .title(savedPromotionPost.getTitle())
+                .author(savedPromotionPost.getAuthor().getNickname())
                 .content(savedPromotionPost.getContent())
                 .part(savedPromotionPost.getCategory())
                 .region(savedPromotionPost.getRegion())
@@ -87,14 +91,19 @@ public class PromotionPostService {
 
 
     // 홍보게시판 게시글 등록
-    public PromotionPostRequestDto createPromotionPost(PromotionPostResponseDto promotionPostResponseDto) {
+    public PromotionPostRequestDto createPromotionPost(PromotionPostResponseDto promotionPostResponseDto,
+                                                       Long memberId) {
+
+        // 작성자 정보 조회
+        Member author = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("Member not found"));
 
         // ResponseDto로부터 Coordinate 객체 생성
         Coordinate coordinate = getCoordinateObject(promotionPostResponseDto.getCoordinates()); // 문자열을 객체로 변환
         // ResponseDto로부터 PromotionPost 객체 생성
         PromotionPost promotionPost = PromotionPost.builder()
                 .title(promotionPostResponseDto.getTitle())
-                //.author(promotionPostResponseDto.getAuthor()) // 작성자 정보는 로그인 기능 구현 후 추가
+                .author(author)
                 .content(promotionPostResponseDto.getContent())
                 .category(promotionPostResponseDto.getPart())
                 .region(promotionPostResponseDto.getRegion())
