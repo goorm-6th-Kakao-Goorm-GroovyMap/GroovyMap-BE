@@ -7,5 +7,5 @@ import lombok.Data;
 @Data
 public class PerformancePlacePostsDto {
 
-    private List<PerformancePlacePostDto> performancePlacePosts = new ArrayList<>();
+    private List<PerformancePlacePostResponseDto> performancePlacePosts = new ArrayList<>();
 }
