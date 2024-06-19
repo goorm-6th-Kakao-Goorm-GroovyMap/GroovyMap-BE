@@ -17,7 +17,7 @@ public class MyPagePost extends Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-//    private MultipartFile photoAndVideo;
+    private String photoUrl;
 
     @ManyToOne
     @JoinColumn(name = "my_page_member_content_id")

@@ -2,8 +2,13 @@ package aespa.groovymap.mypage.service;
 
 import aespa.groovymap.domain.Member;
 import aespa.groovymap.domain.MemberContent;
+import aespa.groovymap.domain.post.MyPagePost;
 import aespa.groovymap.mypage.dto.MyPageInfoDto;
+import aespa.groovymap.mypage.dto.MyPagePhotoDto;
+import aespa.groovymap.mypage.dto.MyPagePhotosDto;
 import aespa.groovymap.repository.MemberRepository;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -41,4 +46,34 @@ public class MyPageService {
         myPageInfoDto.setProfileImage(memberContent.getProfileImage());
         myPageInfoDto.setIntroduction(memberContent.getIntroduction());
     }
+
+    public MyPagePhotosDto getMyPagePhotos(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NoSuchElementException("Wrong Post Id"));
+        MemberContent memberContent = member.getMemberContent();
+
+        List<MyPagePost> myPagePosts = memberContent.getMyPagePosts();
+        List<MyPagePhotoDto> myPagePhotoDtos = getMyPagePhotoDtos(myPagePosts);
+
+        MyPagePhotosDto myPagePhotosDto = new MyPagePhotosDto();
+        myPagePhotosDto.setMyPagePhotoDtos(myPagePhotoDtos);
+
+        return myPagePhotosDto;
+    }
+
+    private List<MyPagePhotoDto> getMyPagePhotoDtos(List<MyPagePost> myPagePosts) {
+        List<MyPagePhotoDto> myPagePhotoDtos = new ArrayList<>();
+
+        for (MyPagePost myPagePost : myPagePosts) {
+            MyPagePhotoDto myPagePhotoDto = new MyPagePhotoDto();
+
+            myPagePhotoDto.setId(myPagePost.getId());
+            myPagePhotoDto.setPhotoUrl(myPagePost.getPhotoUrl());
+
+            myPagePhotoDtos.add(myPagePhotoDto);
+        }
+        return myPagePhotoDtos;
+    }
+
+
 }
