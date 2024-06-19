@@ -3,17 +3,21 @@ package aespa.groovymap.promotionpost.service;
 import aespa.groovymap.domain.Category;
 import aespa.groovymap.domain.Coordinate;
 import aespa.groovymap.domain.Member;
+import aespa.groovymap.domain.MemberContent;
 import aespa.groovymap.domain.post.PromotionPost;
+import aespa.groovymap.domain.post.SavedPost;
 import aespa.groovymap.promotionpost.dto.PromotionPostRequestDto;
 import aespa.groovymap.promotionpost.dto.PromotionPostResponseDto;
 import aespa.groovymap.promotionpost.repository.PromotionPostRepository;
 import aespa.groovymap.repository.MemberRepository;
+import aespa.groovymap.repository.SavedPostRepository;
 import aespa.groovymap.upload.dto.UploadFileDto;
 import aespa.groovymap.upload.dto.UploadResultDto;
 import aespa.groovymap.upload.service.UpDownService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -34,6 +38,7 @@ public class PromotionPostService {
     private final PromotionPostRepository promotionPostRepository;
     private final UpDownService upDownService;
     private final MemberRepository memberRepository;
+    private final SavedPostRepository savedPostRepository;
 
     // 전체 홍보게시판 게시글 조회
     public List<PromotionPostRequestDto> findAll() {
@@ -156,5 +161,52 @@ public class PromotionPostService {
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Failed to parse coordinate", e);
         }
+    }
+
+    // 홍보게시판 게시글 저장
+    public void savePost(Long postId, Long memberId) {
+        // 게시글 조회
+        PromotionPost promotionPost = promotionPostRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
+
+        // 회원 조회
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
+
+        // 회원의 MemberContent가 null인 경우 초기화
+        MemberContent memberContent = member.getMemberContent();
+        if (memberContent == null) {
+            memberContent = new MemberContent();
+            member.setMemberContent(memberContent);
+        }
+
+        // MemberContent의 savedPosts가 null인 경우 초기화
+        if (memberContent.getSavedPosts() == null) {
+            memberContent.setSavedPosts(new ArrayList<>());
+        }
+
+        // 게시글 저장 여부 확인
+        boolean isSaved = memberContent.getSavedPosts().stream()
+                .anyMatch(savedPost -> savedPost.getSavedPost().equals(promotionPost));
+
+        // 이미 저장된 게시글인 경우 예외를 던짐
+        if (isSaved) {
+            throw new IllegalArgumentException("이미 저장된 게시글입니다.");
+        }
+
+        // SavedPost 객체 생성 및 저장
+        SavedPost savedPost = new SavedPost();
+        savedPost.setSavedPost(promotionPost);
+        savedPost.setSavedMemberContent(memberContent);
+
+        // memberContent의 savedPosts 리스트에 savedPost 추가
+        memberContent.getSavedPosts().add(savedPost);
+
+        // savedPostRepository를 통해 SavedPost 객체 저장
+        savedPostRepository.save(savedPost);
+
+        // 홍보 게시글의 저장 수 증가
+        promotionPostRepository.updateSaves(postId);
+
     }
 }

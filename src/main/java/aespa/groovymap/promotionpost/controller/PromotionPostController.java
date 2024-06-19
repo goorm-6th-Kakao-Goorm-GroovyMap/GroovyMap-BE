@@ -96,4 +96,22 @@ public class PromotionPostController {
         }
     }
 
+    // 홍보 게시판 글 저장 요청
+    @Operation(summary = "홍보 게시글 저장 요청", description = "홍보 게시글을 저장 요청합니다.")
+    @PostMapping("/{postId}/save")
+    public ResponseEntity<?> savePost(@PathVariable Long postId,
+                                      @SessionAttribute(name = SessionConstants.MEMBER_ID, required = false) Long memberId) {
+        if (memberId == null) {
+            return new ResponseEntity<>("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED);
+        }
+
+        try {
+            promotionPostService.savePost(postId, memberId);
+            log.info("홍보게시판 게시글 저장 성공: postId = {}", postId);
+            return ResponseEntity.ok().body("홍보게시판 게시글 저장 성공");
+        } catch (Exception e) {
+            log.error("홍보게시판 게시글 저장 실패: postId = {}, error = {}", postId, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 오류가 발생했습니다.");
+        }
+    }
 }
