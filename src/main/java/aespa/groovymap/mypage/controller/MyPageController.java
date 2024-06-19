@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.SessionAttribute;
 
 @Controller
@@ -28,14 +29,10 @@ public class MyPageController {
         return ResponseEntity.badRequest().body("need login");
     }
 
-    @GetMapping("/mypage/photo")
-    public ResponseEntity getMyPagePhotos(
-            @SessionAttribute(name = SessionConstants.MEMBER_ID, required = false) Long memberId) {
+    @GetMapping("/mypage/photo/{memberId}")
+    public ResponseEntity getMyPagePhotos(@PathVariable("memberId") Long memberId) {
         log.info("마이 페이지 게시물 목록 요청");
-        if (memberId != null) {
-            MyPagePhotosDto myPagePhotosDto = myPageService.getMyPagePhotos(memberId);
-            return ResponseEntity.ok(myPagePhotosDto);
-        }
-        return ResponseEntity.badRequest().body("need login");
+        MyPagePhotosDto myPagePhotosDto = myPageService.getMyPagePhotos(memberId);
+        return ResponseEntity.ok(myPagePhotosDto);
     }
 }
