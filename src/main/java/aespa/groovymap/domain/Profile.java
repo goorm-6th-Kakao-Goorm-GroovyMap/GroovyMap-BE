@@ -37,5 +37,7 @@ public class Profile {
     @Enumerated(EnumType.STRING)
     private Category category;
 
-    // 자기소개, 프로필 이미지 필드 추후 구현
+    private String introduction;
+
+    private String profileImage;
 }

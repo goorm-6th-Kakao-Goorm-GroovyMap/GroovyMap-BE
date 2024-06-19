@@ -21,13 +21,15 @@ public class ProfileService {
 
     public void createProfile(Long memberId) {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("Member not found"));
+                .orElseThrow(() -> new IllegalArgumentException(memberId + " 회원 정보가 존재하지 않습니다."));
 
         Profile profile = new Profile();
         profile.setMember(member);
         profile.setNickname(member.getNickname());
         profile.setRegion(member.getRegion());
         profile.setCategory(member.getCategory());
+        profile.setIntroduction(""); // 추후 수정
+        profile.setProfileImage(""); // 추후 수정
 
         profileRepository.save(profile);
     }
@@ -41,9 +43,12 @@ public class ProfileService {
     private ProfileDto convertToDTO(Profile profile) {
         return ProfileDto.builder()
                 .id(profile.getId())
+                .memberId(profile.getMember().getId())
                 .nickname(profile.getNickname())
                 .region(profile.getRegion())
                 .part(profile.getCategory())
+                .introduction(profile.getIntroduction())
+                .profileImage(profile.getProfileImage())
                 .build();
     }
 }
