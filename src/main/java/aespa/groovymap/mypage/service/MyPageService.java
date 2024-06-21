@@ -47,8 +47,8 @@ public class MyPageService {
         myPageInfoDto.setIntroduction(memberContent.getIntroduction());
     }
 
-    public MyPagePhotosDto getMyPagePhotos(Long memberId) {
-        Member member = memberRepository.findById(memberId)
+    public MyPagePhotosDto getMyPagePhotos(String nickname) {
+        Member member = memberRepository.findByNickname(nickname)
                 .orElseThrow(() -> new NoSuchElementException("Wrong Post Id"));
         MemberContent memberContent = member.getMemberContent();
 
