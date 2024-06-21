@@ -25,6 +25,7 @@ public class LoginController {
 
     @PostMapping("/login")
     public ResponseEntity login(@RequestBody LoginDto loginDto, HttpServletRequest request) {
+        log.info("로그인 시도");
         Member loginMember = loginService.login(loginDto.getEmail(), loginDto.getPassword());
 
         if (loginMember == null) {
