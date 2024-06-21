@@ -18,7 +18,7 @@ public class RecruitTeamMemberResponseDto {
     private String region; // 활동지역명
     private Category field; // 분야
     private Type part; // 유형
-//    private String coordinates; // 좌표
+    //    private String coordinates; // 좌표
     private Integer recruitNum; // 지원 번호
 
 /*

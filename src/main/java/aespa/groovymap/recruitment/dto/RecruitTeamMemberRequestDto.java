@@ -19,7 +19,7 @@ public class RecruitTeamMemberRequestDto {
     private String region; //활동지역명
     private Category field; //분야
     private Type part; //유형
-//    private Coordinate coordinates; //좌표
+    //    private Coordinate coordinates; //좌표
     private Integer recruitNum; // 모집 인원
     private ZonedDateTime timeStamp; // 날짜
     private Integer viewCount; // 조회수

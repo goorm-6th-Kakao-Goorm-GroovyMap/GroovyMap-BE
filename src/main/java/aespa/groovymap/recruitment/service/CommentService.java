@@ -27,14 +27,14 @@ public class CommentService {
     @Transactional
     public CommentResponseDto addComment(CommentRequestDto commentRequestDto) {
         if (commentRequestDto.getPostId() == null || commentRequestDto.getAuthorId() == null) {
-            throw new IllegalArgumentException("Post ID와 Author ID는 null이 될 수 없습니다.");
+            throw new IllegalArgumentException("Post ID와 Author ID는 null이 될 수 없습니다. postId: " + commentRequestDto.getPostId() + ", authorId: " + commentRequestDto.getAuthorId());
         }
 
         RecruitTeamMemberPost post = recruitTeamMemberRepository.findById(commentRequestDto.getPostId())
-                .orElseThrow(() -> new IllegalArgumentException("잘못된 post ID입니다."));
+                .orElseThrow(() -> new IllegalArgumentException("잘못된 post ID입니다. postId: " + commentRequestDto.getPostId()));
 
         Member author = memberRepository.findById(commentRequestDto.getAuthorId())
-                .orElseThrow(() -> new IllegalArgumentException("잘못된 author ID입니다."));
+                .orElseThrow(() -> new IllegalArgumentException("잘못된 author ID입니다. authorId: " + commentRequestDto.getAuthorId()));
 
         Comment comment = Comment.builder()
                 .commentPost(post)
@@ -47,6 +47,7 @@ public class CommentService {
 
         return convertToResponseDto(savedComment);
     }
+
 
     @Transactional(readOnly = true)
     public List<CommentResponseDto> getCommentsByPostId(Long postId) {

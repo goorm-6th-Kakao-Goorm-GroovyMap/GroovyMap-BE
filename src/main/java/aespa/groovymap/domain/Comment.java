@@ -34,6 +34,6 @@ public class Comment {
     private Post commentPost;
 
     private ZonedDateTime timestamp;
-
-    private Long postId;
+    // 미사용 postId제거 실제 사용되는 Post의 id는 commentPost안에 존재
+    //private Long postId;
 }

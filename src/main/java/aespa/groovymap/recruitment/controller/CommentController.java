@@ -6,6 +6,7 @@ import aespa.groovymap.recruitment.service.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,10 +19,11 @@ import java.util.List;
 @RequestMapping("/recruitboard")
 public class CommentController {
 
+    @Autowired
     private final CommentService commentService;
 
     @Operation(summary = "댓글 추가", description = "새 댓글을 추가합니다.")
-    @PostMapping("/{postId}/comments")
+    @PostMapping("/{postId}/comment")
     public ResponseEntity<?> addComment(@PathVariable Long postId, @RequestBody CommentRequestDto commentRequestDto) {
         try {
             log.debug("Adding comment with postId: " + postId + ", authorId: " + commentRequestDto.getAuthorId());
@@ -36,7 +38,7 @@ public class CommentController {
     }
 
     @Operation(summary = "댓글 조회", description = "특정 게시글의 모든 댓글을 조회합니다.")
-    @GetMapping("/{postId}/comments")
+    @GetMapping("/{postId}/comment")
     public ResponseEntity<?> getCommentsByPostId(@PathVariable Long postId) {
         try {
             List<CommentResponseDto> responseDtos = commentService.getCommentsByPostId(postId);
