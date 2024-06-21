@@ -1,6 +1,5 @@
 package aespa.groovymap.profile.dto;
 
-import aespa.groovymap.domain.Category;
 import lombok.Builder;
 import lombok.Data;
 
@@ -11,7 +10,7 @@ public class ProfileDto {
     private Long memberId;
     private String nickname;
     private String region;
-    private Category part;
+    private String part;
     private String introduction;
     private String profileImage;
 }

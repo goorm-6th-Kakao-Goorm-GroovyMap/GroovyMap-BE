@@ -3,8 +3,6 @@ package aespa.groovymap.profile.controller;
 import aespa.groovymap.config.SessionConstants;
 import aespa.groovymap.profile.dto.ProfileDto;
 import aespa.groovymap.profile.service.ProfileService;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.SessionAttribute;
 
 @RestController
 @Slf4j
@@ -24,14 +23,13 @@ public class ProfileController {
     private final ProfileService profileService;
 
     @PostMapping("/add")
-    public ResponseEntity<?> createProfile(HttpServletRequest request) {
+    public ResponseEntity<?> createProfile(
+            @SessionAttribute(name = SessionConstants.MEMBER_ID, required = false) Long memberId) {
 
-        HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute(SessionConstants.MEMBER_ID) == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
+        if (memberId == null) {
+            log.info("로그인이 필요합니다.");
+            return new ResponseEntity<>("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED);
         }
-
-        Long memberId = (Long) session.getAttribute(SessionConstants.MEMBER_ID);
 
         try {
             profileService.createProfile(memberId);

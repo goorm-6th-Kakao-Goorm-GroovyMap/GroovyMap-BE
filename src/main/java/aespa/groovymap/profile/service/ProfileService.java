@@ -1,6 +1,7 @@
 package aespa.groovymap.profile.service;
 
 import aespa.groovymap.domain.Member;
+import aespa.groovymap.domain.MemberContent;
 import aespa.groovymap.domain.Profile;
 import aespa.groovymap.profile.dto.ProfileDto;
 import aespa.groovymap.profile.repository.ProfileRepository;
@@ -23,13 +24,25 @@ public class ProfileService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException(memberId + " 회원 정보가 존재하지 않습니다."));
 
+        // 회원의 MemberContent가 null인 경우 초기화
+        MemberContent memberContent = member.getMemberContent();
+        if (memberContent == null) {
+            memberContent = new MemberContent();
+            member.setMemberContent(memberContent);
+        }
+
+        // 회원의 introduction이 null일 경우 초기화
+        if (memberContent.getIntroduction() == null) {
+            memberContent.setIntroduction("Hello I'm " + member.getNickname());
+        }
+
         Profile profile = new Profile();
         profile.setMember(member);
         profile.setNickname(member.getNickname());
         profile.setRegion(member.getRegion());
         profile.setCategory(member.getCategory());
-        profile.setIntroduction(""); // 추후 수정
-        profile.setProfileImage(""); // 추후 수정
+        profile.setIntroduction(memberContent.getIntroduction());
+        profile.setProfileImage(null); // 추후 수정
 
         profileRepository.save(profile);
     }
@@ -46,7 +59,7 @@ public class ProfileService {
                 .memberId(profile.getMember().getId())
                 .nickname(profile.getNickname())
                 .region(profile.getRegion())
-                .part(profile.getCategory())
+                .part(String.valueOf(profile.getCategory()))
                 .introduction(profile.getIntroduction())
                 .profileImage(profile.getProfileImage())
                 .build();
