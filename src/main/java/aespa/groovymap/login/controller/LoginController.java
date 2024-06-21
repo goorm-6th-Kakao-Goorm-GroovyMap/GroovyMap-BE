@@ -51,7 +51,7 @@ public class LoginController {
         log.info("memberInfo request come : {}", memberId);
         if (memberId != null) {
             MemberInfoDto memberInfoDto = loginService.getMemberInfo(memberId);
-            return ResponseEntity.ok(memberId);
+            return ResponseEntity.ok(memberInfoDto);
         } else {
             return ResponseEntity.ok("need login");
         }
