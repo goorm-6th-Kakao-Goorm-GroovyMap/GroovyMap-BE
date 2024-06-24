@@ -54,6 +54,7 @@ public class PromotionPostController {
                                        @SessionAttribute(name = SessionConstants.MEMBER_ID, required = false) Long memberId) {
 
         if (memberId == null) {
+            log.info("로그인이 필요합니다.");
             return new ResponseEntity<>("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED); // 401 Unauthorized
         }
 
@@ -102,6 +103,7 @@ public class PromotionPostController {
     public ResponseEntity<?> savePost(@PathVariable Long postId,
                                       @SessionAttribute(name = SessionConstants.MEMBER_ID, required = false) Long memberId) {
         if (memberId == null) {
+            log.info("로그인이 필요합니다.");
             return new ResponseEntity<>("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED);
         }
 
@@ -114,4 +116,25 @@ public class PromotionPostController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 오류가 발생했습니다.");
         }
     }
+
+    // 홍보 게시판 글 좋아요 요청
+    @Operation(summary = "홍보 게시글 좋아요 요청", description = "홍보 게시글에 좋아요를 요청합니다.")
+    @PostMapping("/{postId}/like")
+    public ResponseEntity<?> likePost(@PathVariable Long postId,
+                                      @SessionAttribute(name = SessionConstants.MEMBER_ID, required = false) Long memberId) {
+        if (memberId == null) {
+            log.info("로그인이 필요합니다.");
+            return new ResponseEntity<>("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED);
+        }
+
+        try {
+            promotionPostService.likePost(postId, memberId);
+            log.info("홍보게시판 게시글 좋아요 성공: postId = {}", postId);
+            return ResponseEntity.ok().body("홍보게시판 게시글 좋아요 성공");
+        } catch (Exception e) {
+            log.error("홍보게시판 게시글 좋아요 실패: postId = {}, error = {}", postId, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 오류가 발생했습니다.");
+        }
+    }
+
 }

@@ -22,5 +22,6 @@ public class PromotionPostRequestDto {
     private Integer savesCount; // 저장수
     private Integer viewCount; // 조회수
     private List<String> fileNames; // 첨부파일의 이름들
+    private String profileImage; // 프로필 이미지
 
 }

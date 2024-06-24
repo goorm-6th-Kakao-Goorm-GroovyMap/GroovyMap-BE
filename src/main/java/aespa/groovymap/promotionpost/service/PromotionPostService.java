@@ -4,11 +4,13 @@ import aespa.groovymap.domain.Category;
 import aespa.groovymap.domain.Coordinate;
 import aespa.groovymap.domain.Member;
 import aespa.groovymap.domain.MemberContent;
+import aespa.groovymap.domain.post.LikedPost;
 import aespa.groovymap.domain.post.PromotionPost;
 import aespa.groovymap.domain.post.SavedPost;
 import aespa.groovymap.promotionpost.dto.PromotionPostRequestDto;
 import aespa.groovymap.promotionpost.dto.PromotionPostResponseDto;
 import aespa.groovymap.promotionpost.repository.PromotionPostRepository;
+import aespa.groovymap.repository.LikedPostRepository;
 import aespa.groovymap.repository.MemberRepository;
 import aespa.groovymap.repository.SavedPostRepository;
 import aespa.groovymap.upload.dto.UploadFileDto;
@@ -39,6 +41,7 @@ public class PromotionPostService {
     private final UpDownService upDownService;
     private final MemberRepository memberRepository;
     private final SavedPostRepository savedPostRepository;
+    private final LikedPostRepository likedPostRepository;
 
     // 전체 홍보게시판 게시글 조회
     public List<PromotionPostRequestDto> findAll() {
@@ -75,6 +78,7 @@ public class PromotionPostService {
                 .id(savedPromotionPost.getId())
                 .title(savedPromotionPost.getTitle())
                 .author(savedPromotionPost.getAuthor().getNickname())
+                .profileImage(savedPromotionPost.getAuthor().getMemberContent().getProfileImage())
                 .content(savedPromotionPost.getContent())
                 .part(savedPromotionPost.getCategory())
                 .region(savedPromotionPost.getRegion())
@@ -173,7 +177,7 @@ public class PromotionPostService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
 
-        // 회원의 MemberContent가 null인 경우 초기화
+        // 회원의 MemberContent가 null인 경우 초기화 -> merge하면 지워도될듯
         MemberContent memberContent = member.getMemberContent();
         if (memberContent == null) {
             memberContent = new MemberContent();
@@ -209,4 +213,51 @@ public class PromotionPostService {
         promotionPostRepository.updateSaves(postId);
 
     }
+
+    // 홍보게시판 게시글 좋아요
+    public void likePost(Long postId, Long memberId) {
+        // 게시글 조회
+        PromotionPost promotionPost = promotionPostRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
+
+        // 회원 조회
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
+
+        // 회원의 MemberContent가 null인 경우 초기화
+        MemberContent memberContent = member.getMemberContent();
+        if (memberContent == null) {
+            memberContent = new MemberContent();
+            member.setMemberContent(memberContent);
+        }
+
+        // MemberContent의 likedPosts가 null인 경우 초기화
+        if (memberContent.getLikedPosts() == null) {
+            memberContent.setLikedPosts(new ArrayList<>());
+        }
+
+        // 게시글 좋아요 여부 확인
+        boolean isLiked = memberContent.getLikedPosts().stream()
+                .anyMatch(likedPost -> likedPost.getLikedPost().equals(promotionPost));
+
+        // 이미 좋아요한 게시글인 경우 예외를 던짐
+        if (isLiked) {
+            throw new IllegalArgumentException("이미 좋아요한 게시글입니다.");
+        }
+
+        // LikedPost 객체 생성 및 저장
+        LikedPost likedPost = new LikedPost();
+        likedPost.setLikedPost(promotionPost);
+        likedPost.setLikedMemberContent(memberContent);
+
+        // memberContent의 likedPosts 리스트에 likedPost 추가
+        memberContent.getLikedPosts().add(likedPost);
+
+        // likedPostRepository를 통해 LikedPost 객체 저장
+        likedPostRepository.save(likedPost);
+
+        // 홍보 게시글의 좋아요 수 증가
+        promotionPostRepository.updateLikes(postId);
+    }
+
 }
