@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -28,11 +27,12 @@ public class UpDownController {
     // 파일 업로드를 처리하는 엔드포인트
     @Operation(summary = "파일 업로드", description = "POST 방식으로 파일을 업로드합니다.")
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<List<UploadResultDto>> upload(@ModelAttribute UploadFileDto uploadFileDto) {
+    public ResponseEntity<?> upload(@ModelAttribute UploadFileDto uploadFileDto) {
         try {
             // 서비스 클래스의 메서드를 호출하여 파일 업로드 처리
             List<UploadResultDto> result = uploadService.uploadFiles(uploadFileDto);
-            return ResponseEntity.ok(result); // 업로드된 파일 리스트를 반환
+            List<String> filePaths = result.stream().map(UploadResultDto::getFilePath).toList();
+            return ResponseEntity.ok(filePaths);
         } catch (IllegalArgumentException e) {
             log.error("파일 업로드 중 오류 발생: {}", e.getMessage());
             return ResponseEntity.badRequest().body(null); // 파일이 없을 경우 400 응답
@@ -45,7 +45,7 @@ public class UpDownController {
     // 파일 조회를 처리하는 엔드포인트
     @Operation(summary = "view 파일", description = "GET방식으로 첨부파일 조회")
     @GetMapping("/view/{fileNames}")
-    public ResponseEntity<Resource> viewFileGET(@PathVariable String fileNames) {
+    public ResponseEntity<?> viewFileGET(@PathVariable String fileNames) {
         try {
             // 서비스 클래스의 메서드를 호출하여 파일 조회 처리
             return uploadService.viewFile(fileNames);

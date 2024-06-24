@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnailator;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -25,7 +26,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 @Service
 @Slf4j
-//@Profile("local")
+@Profile("local")
 public class LocalUploadService implements UpDownService {
 
     private String uploadPath = "C:\\upload"; // 업로드 경로
@@ -85,7 +86,7 @@ public class LocalUploadService implements UpDownService {
     }
 
     // 파일 조회를 처리하는 메서드
-    public ResponseEntity<Resource> viewFile(String fileNames) {
+    public ResponseEntity<?> viewFile(String fileNames) {
         Resource resource = new FileSystemResource(uploadPath + "\\" + fileNames); // 파일 리소스 생성
         log.info("Attempting to view file at path: " + fileNames);
         if (!resource.exists()) {
