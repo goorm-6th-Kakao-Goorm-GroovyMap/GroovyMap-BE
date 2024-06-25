@@ -22,8 +22,8 @@ public class LocalFileUpload implements FileUpload {
     public String saveFile(MultipartFile multipartFile) throws IOException {
         String fullPath = "";
         if (!multipartFile.isEmpty()) {
-            fullPath = getFullPath(multipartFile.getOriginalFilename());
-            multipartFile.transferTo(new File(fullPath));
+            fullPath = multipartFile.getOriginalFilename();
+            multipartFile.transferTo(new File(getFullPath(fullPath)));
         }
         return "/images/" + fullPath;
     }

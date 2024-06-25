@@ -6,6 +6,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface FileUpload {
 
+    public String getFullPath(String filename);
+
     public String saveFile(MultipartFile multipartFile) throws IOException;
 
     public default String createStoreFileName(String originalFilename) {
