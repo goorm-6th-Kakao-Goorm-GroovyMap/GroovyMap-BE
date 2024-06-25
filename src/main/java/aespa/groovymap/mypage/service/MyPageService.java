@@ -94,20 +94,28 @@ public class MyPageService {
         log.info("membercontent id = {}", memberContent.getId());
 
         setMemberInfo(myPageInfoUpdateRequestDto, member);
-        String profileUrl = setMemberContentInfo(myPageInfoUpdateRequestDto, memberContent);
+        setMemberContentInfo(myPageInfoUpdateRequestDto, memberContent);
 
+        return getMyPageInfoUpdateResponseDto(member, memberContent);
+    }
+
+    private MyPageInfoUpdateResponseDto getMyPageInfoUpdateResponseDto(Member member, MemberContent memberContent) {
         MyPageInfoUpdateResponseDto myPageInfoUpdateResponseDto = new MyPageInfoUpdateResponseDto();
-        myPageInfoUpdateResponseDto.setProfileImage(profileUrl);
+        myPageInfoUpdateResponseDto.setProfileImage(memberContent.getProfileImage());
+        myPageInfoUpdateResponseDto.setIntroduction(memberContent.getIntroduction());
+        myPageInfoUpdateResponseDto.setNickname(member.getNickname());
+        myPageInfoUpdateResponseDto.setRegion(member.getRegion());
+        myPageInfoUpdateResponseDto.setPart(member.getCategory());
+        myPageInfoUpdateResponseDto.setType(member.getType());
         return myPageInfoUpdateResponseDto;
     }
 
-    private String setMemberContentInfo(MyPageInfoUpdateRequestDto myPageInfoUpdateRequestDto,
-                                        MemberContent memberContent)
+    private void setMemberContentInfo(MyPageInfoUpdateRequestDto myPageInfoUpdateRequestDto,
+                                      MemberContent memberContent)
             throws IOException {
         String profileUrl = fileUpload.saveFile(myPageInfoUpdateRequestDto.getProfileImage());
         memberContent.setProfileImage(profileUrl);
         memberContent.setIntroduction(myPageInfoUpdateRequestDto.getIntroduction());
-        return profileUrl;
     }
 
     private void setMemberInfo(MyPageInfoUpdateRequestDto myPageInfoUpdateRequestDto, Member member) {
