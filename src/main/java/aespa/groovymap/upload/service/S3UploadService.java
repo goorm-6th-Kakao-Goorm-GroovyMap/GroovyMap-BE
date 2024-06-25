@@ -13,6 +13,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,8 @@ public class S3UploadService implements UpDownService {
 
     private final AmazonS3 amazonS3;
     private final String bucketName;
+    @Value("${base.url}")
+    private String baseUrl;
 
     @Override
     public List<UploadResultDto> uploadFiles(UploadFileDto uploadFileDto) {
@@ -58,7 +61,7 @@ public class S3UploadService implements UpDownService {
 
     @Override
     public ResponseEntity<?> viewFile(String fileNames) {
-        String fileName = "https://groovymap-s3-bucket.s3.ap-northeast-2.amazonaws.com/" + fileNames;
+        String fileName = baseUrl + fileNames;
 
         return ResponseEntity.ok(fileName);
     }

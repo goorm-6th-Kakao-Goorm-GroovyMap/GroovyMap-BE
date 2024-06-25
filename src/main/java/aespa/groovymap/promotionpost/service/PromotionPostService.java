@@ -260,4 +260,23 @@ public class PromotionPostService {
         promotionPostRepository.updateLikes(postId);
     }
 
+    // 홍보게시판 게시글 삭제
+    public void deletePost(Long postId, Long memberId) {
+        // 게시글 조회
+        PromotionPost promotionPost = promotionPostRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
+
+        // 회원 조회
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
+
+        // 게시글 작성자와 삭제 요청자가 다른 경우 예외를 던짐
+        if (!promotionPost.getAuthor().equals(member)) {
+            throw new IllegalArgumentException("게시글 작성자만 삭제할 수 있습니다.");
+        }
+
+        // 게시글 삭제
+        promotionPostRepository.delete(promotionPost);
+    }
+
 }

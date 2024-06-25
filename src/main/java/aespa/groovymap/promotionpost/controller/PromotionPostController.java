@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -137,4 +138,23 @@ public class PromotionPostController {
         }
     }
 
+    // 홍보 게시판 글 삭제 요청
+    @Operation(summary = "홍보 게시글 삭제 요청", description = "홍보 게시글을 삭제 요청합니다.")
+    @DeleteMapping("/{postId}/delete")
+    public ResponseEntity<?> deletePost(@PathVariable Long postId,
+                                        @SessionAttribute(name = SessionConstants.MEMBER_ID, required = false) Long memberId) {
+        if (memberId == null) {
+            log.info("로그인이 필요합니다.");
+            return new ResponseEntity<>("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED);
+        }
+
+        try {
+            promotionPostService.deletePost(postId, memberId);
+            log.info("홍보게시판 게시글 삭제 성공: postId = {}", postId);
+            return ResponseEntity.ok().body("홍보게시판 게시글 삭제 성공");
+        } catch (Exception e) {
+            log.error("홍보게시판 게시글 삭제 실패: postId = {}, error = {}", postId, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 오류가 발생했습니다.");
+        }
+    }
 }

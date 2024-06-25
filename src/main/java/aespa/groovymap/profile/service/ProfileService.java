@@ -24,6 +24,11 @@ public class ProfileService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException(memberId + " 회원 정보가 존재하지 않습니다."));
 
+        // 이미 프로필이 존재하는지 확인
+        if (profileRepository.findByMember(member).isPresent()) {
+            throw new IllegalArgumentException("이미 등록된 프로필이 존재합니다.");
+        }
+
         // 회원의 MemberContent가 null인 경우 초기화
         MemberContent memberContent = member.getMemberContent();
         if (memberContent == null) {
@@ -38,11 +43,6 @@ public class ProfileService {
 
         Profile profile = new Profile();
         profile.setMember(member);
-        profile.setNickname(member.getNickname());
-        profile.setRegion(member.getRegion());
-        profile.setCategory(member.getCategory());
-        profile.setIntroduction(memberContent.getIntroduction());
-        profile.setProfileImage(null); // 추후 수정
 
         profileRepository.save(profile);
     }
@@ -57,11 +57,21 @@ public class ProfileService {
         return ProfileDto.builder()
                 .id(profile.getId())
                 .memberId(profile.getMember().getId())
-                .nickname(profile.getNickname())
-                .region(profile.getRegion())
-                .part(String.valueOf(profile.getCategory()))
-                .introduction(profile.getIntroduction())
-                .profileImage(profile.getProfileImage())
+                .nickname(profile.getMember().getNickname())
+                .region(profile.getMember().getRegion())
+                .part(String.valueOf(profile.getMember().getCategory()))
+                .introduction(profile.getMember().getMemberContent().getIntroduction())
+                .profileImage(profile.getMember().getMemberContent().getProfileImage())
                 .build();
+    }
+
+    public void deleteProfile(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException(memberId + " 회원 정보가 존재하지 않습니다."));
+
+        Profile profile = profileRepository.findByMember(member)
+                .orElseThrow(() -> new IllegalArgumentException("해당 회원의 프로필이 존재하지 않습니다."));
+
+        profileRepository.delete(profile);
     }
 }
