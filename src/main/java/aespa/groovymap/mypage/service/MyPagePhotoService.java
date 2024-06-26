@@ -62,6 +62,7 @@ public class MyPagePhotoService {
                 .orElseThrow(() -> new NoSuchElementException("Wrong Post Id"));
 
         MyPagePost myPagePost = createMyPagePost(myPagePhotoWriteDto, member);
+        member.getMemberContent().getMyPagePosts().add(myPagePost);
 
         myPagePostRepository.save(myPagePost);
     }
