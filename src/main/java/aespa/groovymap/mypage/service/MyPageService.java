@@ -2,17 +2,12 @@ package aespa.groovymap.mypage.service;
 
 import aespa.groovymap.domain.Member;
 import aespa.groovymap.domain.MemberContent;
-import aespa.groovymap.domain.post.MyPagePost;
 import aespa.groovymap.mypage.dto.MyPageInfoDto;
 import aespa.groovymap.mypage.dto.MyPageInfoUpdateRequestDto;
 import aespa.groovymap.mypage.dto.MyPageInfoUpdateResponseDto;
-import aespa.groovymap.mypage.dto.MyPagePhotoDto;
-import aespa.groovymap.mypage.dto.MyPagePhotosDto;
 import aespa.groovymap.repository.MemberRepository;
 import aespa.groovymap.uploadutil.util.FileUpload;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -56,35 +51,6 @@ public class MyPageService {
         myPageInfoDto.setIntroduction(memberContent.getIntroduction());
     }
 
-    public MyPagePhotosDto getMyPagePhotos(String nickname) {
-        Member member = memberRepository.findByNickname(nickname)
-                .orElseThrow(() -> new NoSuchElementException("Wrong Post Id"));
-        MemberContent memberContent = member.getMemberContent();
-
-        List<MyPagePost> myPagePosts = memberContent.getMyPagePosts();
-        List<MyPagePhotoDto> myPagePhotoDtos = getMyPagePhotoDtos(myPagePosts);
-
-        MyPagePhotosDto myPagePhotosDto = new MyPagePhotosDto();
-        myPagePhotosDto.setMyPagePhotoDtos(myPagePhotoDtos);
-
-        return myPagePhotosDto;
-    }
-
-    private List<MyPagePhotoDto> getMyPagePhotoDtos(List<MyPagePost> myPagePosts) {
-        List<MyPagePhotoDto> myPagePhotoDtos = new ArrayList<>();
-
-        for (MyPagePost myPagePost : myPagePosts) {
-            MyPagePhotoDto myPagePhotoDto = new MyPagePhotoDto();
-
-            myPagePhotoDto.setId(myPagePost.getId());
-            myPagePhotoDto.setPhotoUrl(myPagePost.getPhotoUrl());
-
-            myPagePhotoDtos.add(myPagePhotoDto);
-        }
-        return myPagePhotoDtos;
-    }
-
-
     public MyPageInfoUpdateResponseDto updateMyPageInfo(Long memberId,
                                                         MyPageInfoUpdateRequestDto myPageInfoUpdateRequestDto)
             throws IOException {
@@ -113,8 +79,7 @@ public class MyPageService {
     private void setMemberContentInfo(MyPageInfoUpdateRequestDto myPageInfoUpdateRequestDto,
                                       MemberContent memberContent)
             throws IOException {
-        String profileUrl = fileUpload.saveFile(myPageInfoUpdateRequestDto.getProfileImage());
-        memberContent.setProfileImage(profileUrl);
+        memberContent.setProfileImage(fileUpload.saveFile(myPageInfoUpdateRequestDto.getProfileImage()));
         memberContent.setIntroduction(myPageInfoUpdateRequestDto.getIntroduction());
     }
 
@@ -124,6 +89,4 @@ public class MyPageService {
         member.setCategory(myPageInfoUpdateRequestDto.getPart());
         member.setType(myPageInfoUpdateRequestDto.getType());
     }
-
-
 }

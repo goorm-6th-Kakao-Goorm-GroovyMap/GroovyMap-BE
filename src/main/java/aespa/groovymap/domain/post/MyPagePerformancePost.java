@@ -4,9 +4,6 @@ import aespa.groovymap.domain.Coordinate;
 import aespa.groovymap.domain.MemberContent;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.Getter;
@@ -16,10 +13,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class MyPagePerformancePost extends Post {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
     @Embedded
     private Coordinate coordinate;
 

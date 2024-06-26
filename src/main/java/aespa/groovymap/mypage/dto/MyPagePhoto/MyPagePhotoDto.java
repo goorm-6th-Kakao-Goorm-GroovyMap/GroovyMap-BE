@@ -1,4 +1,4 @@
-package aespa.groovymap.mypage.dto;
+package aespa.groovymap.mypage.dto.MyPagePhoto;
 
 import lombok.Data;
 

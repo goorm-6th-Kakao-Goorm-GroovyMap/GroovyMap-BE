@@ -4,7 +4,6 @@ import aespa.groovymap.config.SessionConstants;
 import aespa.groovymap.mypage.dto.MyPageInfoDto;
 import aespa.groovymap.mypage.dto.MyPageInfoUpdateRequestDto;
 import aespa.groovymap.mypage.dto.MyPageInfoUpdateResponseDto;
-import aespa.groovymap.mypage.dto.MyPagePhotosDto;
 import aespa.groovymap.mypage.service.MyPageService;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
@@ -28,13 +27,6 @@ public class MyPageController {
         log.info("마이 페이지 정보 요청");
         MyPageInfoDto myPageInfoDto = myPageService.getMyPageInfo(nickname);
         return ResponseEntity.ok(myPageInfoDto);
-    }
-
-    @GetMapping("/mypage/photo/{nickname}")
-    public ResponseEntity getMyPagePhotos(@PathVariable("nickname") String nickname) {
-        log.info("마이 페이지 게시물 목록 요청");
-        MyPagePhotosDto myPagePhotosDto = myPageService.getMyPagePhotos(nickname);
-        return ResponseEntity.ok(myPagePhotosDto);
     }
 
     @PatchMapping("/member/update")
