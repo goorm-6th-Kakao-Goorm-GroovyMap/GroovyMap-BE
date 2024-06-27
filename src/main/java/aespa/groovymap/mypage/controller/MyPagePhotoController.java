@@ -1,6 +1,7 @@
 package aespa.groovymap.mypage.controller;
 
 import aespa.groovymap.config.SessionConstants;
+import aespa.groovymap.mypage.dto.MyPagePhoto.MyPageOnePhotoDto;
 import aespa.groovymap.mypage.dto.MyPagePhoto.MyPagePhotoWriteDto;
 import aespa.groovymap.mypage.dto.MyPagePhoto.MyPagePhotosDto;
 import aespa.groovymap.mypage.service.MyPagePhotoService;
@@ -39,5 +40,12 @@ public class MyPagePhotoController {
             return ResponseEntity.ok("");
         }
         return ResponseEntity.badRequest().body("need login");
+    }
+
+    @GetMapping("/mypage/photo/{nickname}/{postId}")
+    public ResponseEntity getMyPagePhoto(@PathVariable("postId") Long postId) {
+        log.info("마이 페이지 게시글 하나 요청 : {}", postId);
+        MyPageOnePhotoDto myPageOnePhotoDto = myPagePhotoService.getMyPagePhoto(postId);
+        return ResponseEntity.ok(myPageOnePhotoDto);
     }
 }

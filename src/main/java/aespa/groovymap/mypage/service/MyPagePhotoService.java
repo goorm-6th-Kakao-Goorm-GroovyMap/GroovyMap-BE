@@ -1,13 +1,18 @@
 package aespa.groovymap.mypage.service;
 
+import aespa.groovymap.domain.Comment;
 import aespa.groovymap.domain.Member;
 import aespa.groovymap.domain.MemberContent;
 import aespa.groovymap.domain.post.MyPagePost;
+import aespa.groovymap.domain.post.Post;
+import aespa.groovymap.mypage.dto.MyPagePhoto.MyPageOnePhotoDto;
+import aespa.groovymap.mypage.dto.MyPagePhoto.MyPagePhotoComment;
 import aespa.groovymap.mypage.dto.MyPagePhoto.MyPagePhotoDto;
 import aespa.groovymap.mypage.dto.MyPagePhoto.MyPagePhotoWriteDto;
 import aespa.groovymap.mypage.dto.MyPagePhoto.MyPagePhotosDto;
 import aespa.groovymap.mypage.repository.MyPagePostRepository;
 import aespa.groovymap.repository.MemberRepository;
+import aespa.groovymap.repository.PostRepository;
 import aespa.groovymap.uploadutil.util.FileUpload;
 import java.io.IOException;
 import java.time.ZonedDateTime;
@@ -28,10 +33,11 @@ public class MyPagePhotoService {
     private final MyPagePostRepository myPagePostRepository;
     private final MemberRepository memberRepository;
     private final FileUpload fileUpload;
+    private final PostRepository postRepository;
 
     public MyPagePhotosDto getMyPagePhotos(String nickname) {
         Member member = memberRepository.findByNickname(nickname)
-                .orElseThrow(() -> new NoSuchElementException("Wrong Post Id"));
+                .orElseThrow(() -> new NoSuchElementException("Wrong nickname"));
         MemberContent memberContent = member.getMemberContent();
 
         List<MyPagePost> myPagePosts = memberContent.getMyPagePosts();
@@ -59,7 +65,7 @@ public class MyPagePhotoService {
 
     public void writeMyPagePhoto(MyPagePhotoWriteDto myPagePhotoWriteDto, Long memberId) throws IOException {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new NoSuchElementException("Wrong Post Id"));
+                .orElseThrow(() -> new NoSuchElementException("Wrong Member Id"));
 
         MyPagePost myPagePost = createMyPagePost(myPagePhotoWriteDto, member);
         member.getMemberContent().getMyPagePosts().add(myPagePost);
@@ -82,5 +88,48 @@ public class MyPagePhotoService {
         myPagePost.setPhotoUrl(fileUpload.saveFile(myPagePhotoWriteDto.getImage()));
 
         return myPagePost;
+    }
+
+    public MyPageOnePhotoDto getMyPagePhoto(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new NoSuchElementException("Wrong Post Id"));
+
+        MyPageOnePhotoDto myPageOnePhotoDto = new MyPageOnePhotoDto();
+
+        if (post instanceof MyPagePost) {
+            convertPostToMyPageOntPhotoDto(post, myPageOnePhotoDto);
+        } else {
+            throw new NoSuchElementException("MyPagePost Id is required, this id is not MyPagePost id");
+        }
+
+        return myPageOnePhotoDto;
+    }
+
+    private void convertPostToMyPageOntPhotoDto(Post post, MyPageOnePhotoDto myPageOnePhotoDto) {
+        myPageOnePhotoDto.setText(post.getContent());
+        myPageOnePhotoDto.setImage(((MyPagePost) post).getPhotoUrl());
+        myPageOnePhotoDto.setLikes(post.getLikesCount());
+        myPageOnePhotoDto.setComments(makeComments(post.getComments()));
+    }
+
+    private List<MyPagePhotoComment> makeComments(List<Comment> comments) {
+        List<MyPagePhotoComment> myPagePhotoComments = new ArrayList<>();
+
+        for (Comment comment : comments) {
+            MyPagePhotoComment myPagePhotoComment = new MyPagePhotoComment();
+            convertComment(comment, myPagePhotoComment);
+            myPagePhotoComments.add(myPagePhotoComment);
+        }
+
+        return myPagePhotoComments;
+    }
+
+    private void convertComment(Comment comment, MyPagePhotoComment myPagePhotoComment) {
+        Member commentAuthor = comment.getCommentAuthor();
+
+        myPagePhotoComment.setUserNickname(commentAuthor.getNickname());
+        myPagePhotoComment.setUserProfileImage(commentAuthor.getMemberContent().getProfileImage());
+        myPagePhotoComment.setId(comment.getId());
+        myPagePhotoComment.setText(comment.getContent());
     }
 }

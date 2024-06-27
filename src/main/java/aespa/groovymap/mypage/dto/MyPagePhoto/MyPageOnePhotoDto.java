@@ -4,10 +4,10 @@ import java.util.List;
 import lombok.Data;
 
 @Data
-public class MyPagePhotoWriteResponseDto {
+public class MyPageOnePhotoDto {
     private Long id;
     private String text;
     private String image;
-    private Long likes;
-    private List<ResponseComment> comments;
+    private Integer likes;
+    private List<MyPagePhotoComment> comments;
 }
