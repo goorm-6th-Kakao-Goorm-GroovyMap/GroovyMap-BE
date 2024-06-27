@@ -1,11 +1,9 @@
 package aespa.groovymap.upload.controller;
 
 import aespa.groovymap.upload.dto.SingleFileDto;
-import aespa.groovymap.upload.dto.UploadFileDto;
 import aespa.groovymap.upload.dto.UploadResultDto;
 import aespa.groovymap.upload.service.UpDownService;
 import io.swagger.v3.oas.annotations.Operation;
-import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +31,7 @@ public class UpDownController {
             // 서비스 클래스의 메서드를 호출하여 파일 업로드 처리
             UploadResultDto result = uploadService.uploadSingleFile(singleFileDto);
             String filePath = result.getFilePath();
+            log.info("파일 업로드 성공");
             return ResponseEntity.ok(filePath);
         } catch (IllegalArgumentException e) {
             log.error("파일 업로드 중 오류 발생: {}", e.getMessage());
