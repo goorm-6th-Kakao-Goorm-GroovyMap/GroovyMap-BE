@@ -5,7 +5,6 @@ import lombok.Data;
 
 @Data
 public class MyPageOnePhotoDto {
-    private Long id;
     private String text;
     private String image;
     private Integer likes;

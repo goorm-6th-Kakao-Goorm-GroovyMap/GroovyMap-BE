@@ -11,9 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.SessionAttribute;
 
 @Controller
@@ -26,7 +26,7 @@ public class MyPagePerformanceController {
     @PostMapping("/mypage/performance/write")
     public ResponseEntity writeMyPagePerformance(
             @SessionAttribute(name = SessionConstants.MEMBER_ID, required = false) Long memberId,
-            @RequestBody MyPagePerformanceRequestDto myPagePerformanceRequestDto) {
+            @ModelAttribute MyPagePerformanceRequestDto myPagePerformanceRequestDto) {
         log.info("마이 페이지 공연 기록 작성 요청 : {}", memberId);
         if (memberId != null) {
             myPagePerformanceService.writeMyPagePerformance(myPagePerformanceRequestDto, memberId);
