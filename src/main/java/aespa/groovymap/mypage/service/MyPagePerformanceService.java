@@ -4,10 +4,12 @@ import aespa.groovymap.domain.Coordinate;
 import aespa.groovymap.domain.Member;
 import aespa.groovymap.domain.post.MyPagePerformancePost;
 import aespa.groovymap.mypage.dto.MyPagePerformance.MyPagePerformanceRequestDto;
+import aespa.groovymap.mypage.dto.MyPagePerformance.MyPagePerformanceResponseDto;
 import aespa.groovymap.mypage.repository.MyPagePerformancePostRepository;
 import aespa.groovymap.repository.MemberRepository;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,8 +35,8 @@ public class MyPagePerformanceService {
         myPagePerformancePostRepository.save(myPagePerformancePost);
     }
 
-    public MyPagePerformancePost createMyPagePerformancePost(MyPagePerformanceRequestDto myPagePerformanceRequestDto,
-                                                             Member member) {
+    public MyPagePerformancePost createMyPagePerformancePost
+            (MyPagePerformanceRequestDto myPagePerformanceRequestDto, Member member) {
         MyPagePerformancePost myPagePerformancePost = new MyPagePerformancePost();
 
         setMyPerformancePostInfoAboutMember(member, myPagePerformancePost);
@@ -54,8 +56,8 @@ public class MyPagePerformanceService {
         myPagePerformancePost.setMyPagePerformanceMemberContent(member.getMemberContent());
     }
 
-    private void setMyPerformancePostInfoAboutDto(MyPagePerformanceRequestDto myPagePerformanceRequestDto,
-                                                  MyPagePerformancePost myPagePerformancePost) {
+    private void setMyPerformancePostInfoAboutDto
+            (MyPagePerformanceRequestDto myPagePerformanceRequestDto, MyPagePerformancePost myPagePerformancePost) {
         myPagePerformancePost.setContent(myPagePerformanceRequestDto.getDescription());
         myPagePerformancePost.setAddress(myPagePerformancePost.getAddress());
         myPagePerformancePost.setRegion(myPagePerformancePost.getRegion());
@@ -70,5 +72,42 @@ public class MyPagePerformanceService {
         coordinate.setLatitude(myPagePerformanceRequestDto.getLatitude());
         coordinate.setLongitude(myPagePerformanceRequestDto.getLongitude());
         return coordinate;
+    }
+
+    public List<MyPagePerformanceResponseDto> getMyPagePerformances(String nickname) {
+        Member member = memberRepository.findByNickname(nickname)
+                .orElseThrow(() -> new NoSuchElementException("Wrong Post Id"));
+
+        List<MyPagePerformancePost> myPagePerformancePosts = member.getMemberContent().getMyPagePerformancePosts();
+
+        return getMyPagePerformanceDtos(myPagePerformancePosts);
+    }
+
+    private List<MyPagePerformanceResponseDto> getMyPagePerformanceDtos(
+            List<MyPagePerformancePost> myPagePerformancePosts) {
+
+        List<MyPagePerformanceResponseDto> myPagePerformanceResponseDtos = new ArrayList<>();
+
+        for (MyPagePerformancePost myPagePerformancePost : myPagePerformancePosts) {
+            myPagePerformanceResponseDtos.add(makeMyPagePerformanceResponseDto(myPagePerformancePost));
+        }
+
+        return myPagePerformanceResponseDtos;
+    }
+
+    private MyPagePerformanceResponseDto makeMyPagePerformanceResponseDto(MyPagePerformancePost myPagePerformancePost) {
+        MyPagePerformanceResponseDto myPagePerformanceResponseDto = new MyPagePerformanceResponseDto();
+
+        myPagePerformanceResponseDto.setId(myPagePerformancePost.getId());
+        myPagePerformanceResponseDto.setDescription(myPagePerformancePost.getContent());
+        myPagePerformanceResponseDto.setAddress(myPagePerformancePost.getAddress());
+        myPagePerformanceResponseDto.setDate(myPagePerformancePost.getDate());
+        myPagePerformanceResponseDto.setPart(myPagePerformancePost.getCategory());
+        myPagePerformanceResponseDto.setType(myPagePerformancePost.getType());
+        myPagePerformanceResponseDto.setRegion(myPagePerformancePost.getRegion());
+        myPagePerformanceResponseDto.setLatitude(myPagePerformancePost.getCoordinate().getLatitude());
+        myPagePerformanceResponseDto.setLongitude(myPagePerformancePost.getCoordinate().getLongitude());
+
+        return myPagePerformanceResponseDto;
     }
 }
