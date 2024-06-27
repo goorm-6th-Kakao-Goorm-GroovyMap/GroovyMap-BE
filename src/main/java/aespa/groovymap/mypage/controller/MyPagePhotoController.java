@@ -2,6 +2,7 @@ package aespa.groovymap.mypage.controller;
 
 import aespa.groovymap.config.SessionConstants;
 import aespa.groovymap.mypage.dto.MyPagePhoto.MyPageOnePhotoDto;
+import aespa.groovymap.mypage.dto.MyPagePhoto.MyPagePhotoCommentDto;
 import aespa.groovymap.mypage.dto.MyPagePhoto.MyPagePhotoWriteDto;
 import aespa.groovymap.mypage.dto.MyPagePhoto.MyPagePhotosDto;
 import aespa.groovymap.mypage.service.MyPagePhotoService;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.SessionAttribute;
 
 @Controller
@@ -72,5 +74,17 @@ public class MyPagePhotoController {
             return ResponseEntity.ok("");
         }
         return ResponseEntity.badRequest().body("need login");
+    }
+
+    @PostMapping("/mypage/photo/{postId}/comments")
+    public ResponseEntity writeComment(
+            @SessionAttribute(name = SessionConstants.MEMBER_ID, required = false) Long memberId,
+            @PathVariable("postId") Long postId, @RequestBody MyPagePhotoCommentDto myPagePhotoCommentDto) {
+
+        log.info("마이 페이지 게시글에 댓글 요청, 작성자 id : {}, 게시글 id : {}", memberId, postId);
+
+        myPagePhotoService.writeComment(memberId, postId, myPagePhotoCommentDto.getText());
+
+        return ResponseEntity.ok("");
     }
 }

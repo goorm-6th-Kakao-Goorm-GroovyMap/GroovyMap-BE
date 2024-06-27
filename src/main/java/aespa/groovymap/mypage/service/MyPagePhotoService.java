@@ -11,6 +11,7 @@ import aespa.groovymap.mypage.dto.MyPagePhoto.MyPagePhotoDto;
 import aespa.groovymap.mypage.dto.MyPagePhoto.MyPagePhotoWriteDto;
 import aespa.groovymap.mypage.dto.MyPagePhoto.MyPagePhotosDto;
 import aespa.groovymap.mypage.repository.MyPagePostRepository;
+import aespa.groovymap.repository.CommentRepository;
 import aespa.groovymap.repository.MemberRepository;
 import aespa.groovymap.repository.PostRepository;
 import aespa.groovymap.uploadutil.util.FileUpload;
@@ -32,8 +33,9 @@ public class MyPagePhotoService {
 
     private final MyPagePostRepository myPagePostRepository;
     private final MemberRepository memberRepository;
-    private final FileUpload fileUpload;
     private final PostRepository postRepository;
+    private final CommentRepository commentRepository;
+    private final FileUpload fileUpload;
 
     public MyPagePhotosDto getMyPagePhotos(String nickname) {
         Member member = memberRepository.findByNickname(nickname)
@@ -153,6 +155,25 @@ public class MyPagePhotoService {
     }
 
     public void likeMyPagePhoto(Long memberId, Long postId) {
-        
+
+    }
+
+    public void writeComment(Long memberId, Long postId, String text) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NoSuchElementException("Wrong Member Id"));
+        Post post = postRepository.findById(postId).orElseThrow(() -> new NoSuchElementException("Wrong Post Id"));
+
+        Comment comment = makeComment(text, member, post);
+        post.getComments().add(comment);
+    }
+
+    private Comment makeComment(String text, Member member, Post post) {
+        Comment comment = new Comment();
+        comment.setCommentAuthor(member);
+        comment.setContent(text);
+        comment.setCommentPost(post);
+
+        commentRepository.save(comment);
+        return comment;
     }
 }
