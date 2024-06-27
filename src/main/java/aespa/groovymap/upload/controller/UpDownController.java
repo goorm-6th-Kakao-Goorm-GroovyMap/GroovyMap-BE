@@ -1,5 +1,6 @@
 package aespa.groovymap.upload.controller;
 
+import aespa.groovymap.upload.dto.SingleFileDto;
 import aespa.groovymap.upload.dto.UploadFileDto;
 import aespa.groovymap.upload.dto.UploadResultDto;
 import aespa.groovymap.upload.service.UpDownService;
@@ -27,12 +28,12 @@ public class UpDownController {
     // 파일 업로드를 처리하는 엔드포인트
     @Operation(summary = "파일 업로드", description = "POST 방식으로 파일을 업로드합니다.")
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> upload(@ModelAttribute UploadFileDto uploadFileDto) {
+    public ResponseEntity<?> upload(@ModelAttribute SingleFileDto singleFileDto) {
         try {
             // 서비스 클래스의 메서드를 호출하여 파일 업로드 처리
-            List<UploadResultDto> result = uploadService.uploadFiles(uploadFileDto);
-            List<String> filePaths = result.stream().map(UploadResultDto::getFilePath).toList();
-            return ResponseEntity.ok(filePaths);
+            UploadResultDto result = uploadService.uploadSingleFile(singleFileDto);
+            String filePath = result.getFilePath();
+            return ResponseEntity.ok(filePath);
         } catch (IllegalArgumentException e) {
             log.error("파일 업로드 중 오류 발생: {}", e.getMessage());
             return ResponseEntity.badRequest().body(null); // 파일이 없을 경우 400 응답

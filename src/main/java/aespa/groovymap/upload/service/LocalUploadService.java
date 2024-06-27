@@ -1,5 +1,6 @@
 package aespa.groovymap.upload.service;
 
+import aespa.groovymap.upload.dto.SingleFileDto;
 import aespa.groovymap.upload.dto.UploadFileDto;
 import aespa.groovymap.upload.dto.UploadResultDto;
 import java.io.File;
@@ -30,6 +31,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 public class LocalUploadService implements UpDownService {
 
     private String uploadPath = "C:\\upload"; // 업로드 경로
+
+    @Override
+    public UploadResultDto uploadSingleFile(SingleFileDto singleFileDto) {
+        return null;
+    }
 
     // 파일 업로드를 처리하는 메서드
     public List<UploadResultDto> uploadFiles(UploadFileDto uploadFileDto) {

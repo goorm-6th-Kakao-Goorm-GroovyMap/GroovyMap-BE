@@ -1,12 +1,16 @@
 package aespa.groovymap.upload.service;
 
+import aespa.groovymap.upload.dto.SingleFileDto;
 import aespa.groovymap.upload.dto.UploadFileDto;
 import aespa.groovymap.upload.dto.UploadResultDto;
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -30,11 +34,21 @@ public class S3UploadService implements UpDownService {
     @Value("${base.url}")
     private String baseUrl;
 
+
+    // 단일 파일 업로드 메서드
+    @Override
+    public UploadResultDto uploadSingleFile(SingleFileDto singleFileDto) {
+        return uploadFile(singleFileDto.getFile());
+    }
+
+    // 다중 파일 업로드 메서드
     @Override
     public List<UploadResultDto> uploadFiles(UploadFileDto uploadFileDto) {
         return uploadFileDto.getFiles().stream().map(this::uploadFile).collect(Collectors.toList());
     }
 
+
+    // 파일 업로드 메서드
     private UploadResultDto uploadFile(MultipartFile multipartFile) {
         String originalFilename = multipartFile.getOriginalFilename();
         String fileName = UUID.randomUUID() + "_" + originalFilename;
@@ -68,6 +82,22 @@ public class S3UploadService implements UpDownService {
 
     @Override
     public Map<String, Boolean> removeFile(String fileNames) {
-        return null;
+        Map<String, Boolean> resultMap = new HashMap<>();
+
+        // 여러 파일 이름이 콤마로 구분되어 들어오는 경우를 처리
+        String[] fileNameArray = fileNames.split(",");
+
+        for (String fileName : fileNameArray) {
+            try {
+                // S3 버킷에서 파일 삭제
+                amazonS3.deleteObject(new DeleteObjectRequest(bucketName, fileName.trim()));
+                resultMap.put(fileName, true); // 삭제 성공
+            } catch (AmazonServiceException e) {
+                log.error("Failed to delete file from S3: {}", fileName, e);
+                resultMap.put(fileName, false); // 삭제 실패
+            }
+        }
+
+        return resultMap;
     }
 }
