@@ -87,4 +87,16 @@ public class MyPagePhotoController {
 
         return ResponseEntity.ok("");
     }
+
+    @DeleteMapping("/mypage/photo/{postId}/comments/{commentId}")
+    public ResponseEntity deleteComment(
+            @SessionAttribute(name = SessionConstants.MEMBER_ID, required = false) Long memberId,
+            @PathVariable("commentId") Long commentId) {
+        log.info("마이 페이지 게시글 댓글 삭제 요청 : {}", commentId);
+        if (memberId != null) {
+            myPagePhotoService.deleteMyPagePhotoComment(memberId, commentId);
+            return ResponseEntity.ok("");
+        }
+        return ResponseEntity.badRequest().body("need login");
+    }
 }

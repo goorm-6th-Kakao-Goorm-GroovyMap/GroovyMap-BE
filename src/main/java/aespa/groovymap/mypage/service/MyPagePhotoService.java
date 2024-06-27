@@ -176,4 +176,15 @@ public class MyPagePhotoService {
         commentRepository.save(comment);
         return comment;
     }
+
+    public void deleteMyPagePhotoComment(Long memberId, Long commentId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new NoSuchElementException("Wrong Comment Id"));
+
+        if (comment.getCommentAuthor().getId() == memberId) {
+            commentRepository.delete(comment);
+        } else {
+            throw new SecurityException("cannot delete other user's post");
+        }
+    }
 }
