@@ -17,6 +17,7 @@ import aespa.groovymap.repository.PostRepository;
 import aespa.groovymap.uploadutil.util.FileUpload;
 import java.io.IOException;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -111,6 +112,7 @@ public class MyPagePhotoService {
         myPageOnePhotoDto.setText(post.getContent());
         myPageOnePhotoDto.setImage(((MyPagePost) post).getPhotoUrl());
         myPageOnePhotoDto.setLikes(post.getLikesCount());
+        myPageOnePhotoDto.setCreatedAt(post.getTimestamp().format(DateTimeFormatter.ISO_ZONED_DATE_TIME));
         myPageOnePhotoDto.setComments(makeComments(post.getComments()));
     }
 
@@ -133,6 +135,7 @@ public class MyPagePhotoService {
         myPagePhotoComment.setUserProfileImage(commentAuthor.getMemberContent().getProfileImage());
         myPagePhotoComment.setId(comment.getId());
         myPagePhotoComment.setText(comment.getContent());
+        myPagePhotoComment.setCreatedAt(comment.getTimestamp().format(DateTimeFormatter.ISO_ZONED_DATE_TIME));
     }
 
     public void deleteMyPagePhoto(Long memberId, Long postId) {

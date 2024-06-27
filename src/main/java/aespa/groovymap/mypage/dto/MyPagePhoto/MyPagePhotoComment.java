@@ -8,4 +8,5 @@ public class MyPagePhotoComment {
     private String text;
     private String userNickname;
     private String userProfileImage;
+    private String createdAt;
 }

@@ -8,5 +8,6 @@ public class MyPageOnePhotoDto {
     private String text;
     private String image;
     private Integer likes;
+    private String createdAt;
     private List<MyPagePhotoComment> comments;
 }
