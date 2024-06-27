@@ -6,6 +6,8 @@ import aespa.groovymap.domain.MemberContent;
 import aespa.groovymap.domain.Type;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.Getter;
@@ -18,10 +20,10 @@ public class MyPagePerformancePost extends Post {
     @Embedded
     private Coordinate coordinate;
 
-    @Embedded
+    @Enumerated(EnumType.STRING)
     private Category category;
 
-    @Embedded
+    @Enumerated(EnumType.STRING)
     private Type type;
 
     private String address;

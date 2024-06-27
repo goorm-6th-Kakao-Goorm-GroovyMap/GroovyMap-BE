@@ -62,8 +62,8 @@ public class MyPagePerformanceService {
     private void setMyPerformancePostInfoAboutDto
             (MyPagePerformanceRequestDto myPagePerformanceRequestDto, MyPagePerformancePost myPagePerformancePost) {
         myPagePerformancePost.setContent(myPagePerformanceRequestDto.getDescription());
-        myPagePerformancePost.setAddress(myPagePerformancePost.getAddress());
-        myPagePerformancePost.setRegion(myPagePerformancePost.getRegion());
+        myPagePerformancePost.setAddress(myPagePerformanceRequestDto.getAddress());
+        myPagePerformancePost.setRegion(myPagePerformanceRequestDto.getRegion());
         myPagePerformancePost.setCategory(myPagePerformanceRequestDto.getPart());
         myPagePerformancePost.setType(myPagePerformanceRequestDto.getType());
         myPagePerformancePost.setDate(myPagePerformanceRequestDto.getDate());
