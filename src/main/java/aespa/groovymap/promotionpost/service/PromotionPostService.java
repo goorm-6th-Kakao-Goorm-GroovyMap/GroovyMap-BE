@@ -5,8 +5,10 @@ import aespa.groovymap.domain.Coordinate;
 import aespa.groovymap.domain.Member;
 import aespa.groovymap.domain.MemberContent;
 import aespa.groovymap.domain.post.LikedPost;
+import aespa.groovymap.domain.post.Post;
 import aespa.groovymap.domain.post.PromotionPost;
 import aespa.groovymap.domain.post.SavedPost;
+import aespa.groovymap.promotionpost.dto.MyListDto;
 import aespa.groovymap.promotionpost.dto.PromotionPostRequestDto;
 import aespa.groovymap.promotionpost.dto.PromotionPostResponseDto;
 import aespa.groovymap.promotionpost.repository.PromotionPostRepository;
@@ -21,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -275,8 +278,76 @@ public class PromotionPostService {
             throw new IllegalArgumentException("게시글 작성자만 삭제할 수 있습니다.");
         }
 
+        // 해당 글에 대한 모든 좋아요 기록 삭제
+        List<LikedPost> likedPosts = likedPostRepository.findByLikedPost(promotionPost);
+        likedPosts.forEach(likedPostRepository::delete);
+
+        // 해당 글에 대한 모든 저장 기록 삭제
+        List<SavedPost> savedPosts = savedPostRepository.findBySavedPost(promotionPost);
+        savedPosts.forEach(savedPostRepository::delete);
+
+        // S3에 업로드된 파일 삭제 로직 추가
+        List<String> fileNames = promotionPost.getImageSet().stream()
+                .map(image -> image.getFileName())
+                .collect(Collectors.toList());
+        String filesToDelete = String.join(",", fileNames);
+        Map<String, Boolean> deleteResults = upDownService.removeFile(filesToDelete);
+
+        // 삭제 결과 로그 출력
+        deleteResults.forEach((fileName, success) -> {
+            if (success) {
+                log.info("Deleted file from S3: {}", fileName);
+            } else {
+                log.error("Failed to delete file from S3: {}", fileName);
+            }
+        });
+
         // 게시글 삭제
         promotionPostRepository.delete(promotionPost);
     }
 
+    // 로그인한 사용자가 좋아요,저장한 홍보게시판 게시글 목록 조회
+    public MyListDto getMyList(Long memberId) {
+        // 회원 조회
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
+
+        // 회원의 MemberContent가 null인 경우 초기화
+        MemberContent memberContent = member.getMemberContent();
+        if (memberContent == null) {
+            memberContent = new MemberContent();
+            member.setMemberContent(memberContent);
+        }
+
+        // MemberContent의 likedPosts가 null인 경우 초기화
+        if (memberContent.getLikedPosts() == null) {
+            memberContent.setLikedPosts(new ArrayList<>());
+        }
+
+        // MemberContent의 savedPosts가 null인 경우 초기화
+        if (memberContent.getSavedPosts() == null) {
+            memberContent.setSavedPosts(new ArrayList<>());
+        }
+
+        // 좋아요한 게시글 번호 리스트 생성
+        List<Long> likePostIds = memberContent.getLikedPosts().stream()
+                .map(LikedPost::getLikedPost) // LikedPost 객체에서 Post 객체를 가져옴
+                .filter(post -> post instanceof PromotionPost) // 홍보 게시판 게시글인지 확인
+                .map(Post::getId)
+                .collect(Collectors.toList());
+
+        // 저장한 게시글 번호 리스트 생성
+        List<Long> savePostIds = memberContent.getSavedPosts().stream()
+                .map(SavedPost::getSavedPost) // SavedPost 객체에서 Post 객체를 가져옴
+                .filter(post -> post instanceof PromotionPost) // 홍보 게시판 게시글인지 확인
+                .map(Post::getId)
+                .collect(Collectors.toList());
+
+        // MyListDto 생성 및 반환
+        MyListDto myListDto = new MyListDto();
+        myListDto.setLikePostIds(likePostIds);
+        myListDto.setSavePostIds(savePostIds);
+
+        return myListDto;
+    }
 }

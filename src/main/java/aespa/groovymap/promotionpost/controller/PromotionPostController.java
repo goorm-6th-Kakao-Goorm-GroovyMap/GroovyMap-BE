@@ -1,6 +1,7 @@
 package aespa.groovymap.promotionpost.controller;
 
 import aespa.groovymap.config.SessionConstants;
+import aespa.groovymap.promotionpost.dto.MyListDto;
 import aespa.groovymap.promotionpost.dto.PromotionPostRequestDto;
 import aespa.groovymap.promotionpost.dto.PromotionPostResponseDto;
 import aespa.groovymap.promotionpost.service.PromotionPostService;
@@ -157,4 +158,26 @@ public class PromotionPostController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 오류가 발생했습니다.");
         }
     }
+
+    // 로그인한 사용자가 좋아요,저장한 홍보게시판 게시글 목록 조회
+    @Operation(summary = "사용자가 좋아요,저장한 홍보게시판 게시글 목록 조회", description = "사용자가 좋아요,저장한 홍보게시판 게시글 목록을 조회합니다.")
+    @GetMapping("/myList")
+    public ResponseEntity<?> getMyList(
+            @SessionAttribute(name = SessionConstants.MEMBER_ID, required = false) Long memberId) {
+        if (memberId == null) {
+            log.info("로그인이 필요합니다.");
+            return new ResponseEntity<>("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED);
+        }
+
+        try {
+            MyListDto myListDto = promotionPostService.getMyList(memberId);
+            log.info("사용자가 좋아요,저장한 홍보게시판 게시글 목록 조회 성공");
+            return ResponseEntity.ok().body(myListDto);
+        } catch (Exception e) {
+            log.error("사용자가 좋아요,저장한 홍보게시판 게시글 목록 조회 실패", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("사용자가 좋아요,저장한 홍보게시판 게시글 목록 조회 실패");
+        }
+    }
+
+
 }
