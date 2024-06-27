@@ -114,11 +114,21 @@ public class MyPagePerformanceService {
         return myPagePerformanceResponseDto;
     }
 
-    public void deleteMyPagePerformance(Long postId) {
+    public void deleteMyPagePerformance(Long memberId, Long postId) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new NoSuchElementException("Wrong Post Id"));
 
+        if (post.getAuthor().getId() == memberId) {
+            deleteMyPagePerformancePost(post);
+        } else {
+            throw new SecurityException("cannot delete other user's post");
+        }
+    }
+
+    private void deleteMyPagePerformancePost(Post post) {
         if (post instanceof MyPagePerformancePost) {
             myPagePerformancePostRepository.delete((MyPagePerformancePost) post);
+        } else {
+            throw new NoSuchElementException("Wrong post id, you need to send MyPagePhotoId");
         }
         postRepository.delete(post);
     }

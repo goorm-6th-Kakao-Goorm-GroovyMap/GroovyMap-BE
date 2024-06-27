@@ -44,9 +44,14 @@ public class MyPagePerformanceController {
     }
 
     @DeleteMapping("/mypage/performance/{postId}")
-    public ResponseEntity deleteMyPagePerformance(@PathVariable("postId") Long postId) {
+    public ResponseEntity deleteMyPagePerformance(
+            @SessionAttribute(name = SessionConstants.MEMBER_ID, required = false) Long memberId,
+            @PathVariable("postId") Long postId) {
         log.info("마이 페이지 공연 기록 삭제 요청 : {}", postId);
-        myPagePerformanceService.deleteMyPagePerformance(postId);
-        return ResponseEntity.ok("deletion success");
+        if (memberId != null) {
+            myPagePerformanceService.deleteMyPagePerformance(memberId, postId);
+            return ResponseEntity.ok("deletion success");
+        }
+        return ResponseEntity.badRequest().body("need login");
     }
 }

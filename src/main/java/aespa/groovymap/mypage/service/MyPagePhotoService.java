@@ -132,4 +132,23 @@ public class MyPagePhotoService {
         myPagePhotoComment.setId(comment.getId());
         myPagePhotoComment.setText(comment.getContent());
     }
+
+    public void deleteMyPagePhoto(Long memberId, Long postId) {
+        Post post = postRepository.findById(postId).orElseThrow(() -> new NoSuchElementException("Wrong Post Id"));
+
+        if (post.getAuthor().getId() == memberId) {
+            deleteMyPagePhotoPost(post);
+        } else {
+            throw new SecurityException("cannot delete other user's post");
+        }
+    }
+
+    private void deleteMyPagePhotoPost(Post post) {
+        if (post instanceof MyPagePost) {
+            myPagePostRepository.delete((MyPagePost) post);
+        } else {
+            throw new NoSuchElementException("Wrong post id, you need to send MyPagePhotoId");
+        }
+        postRepository.delete(post);
+    }
 }

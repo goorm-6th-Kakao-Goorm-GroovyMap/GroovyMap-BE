@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -47,5 +48,17 @@ public class MyPagePhotoController {
         log.info("마이 페이지 게시글 하나 요청 : {}", postId);
         MyPageOnePhotoDto myPageOnePhotoDto = myPagePhotoService.getMyPagePhoto(postId);
         return ResponseEntity.ok(myPageOnePhotoDto);
+    }
+
+    @DeleteMapping("/mypage/photo/{postId}")
+    public ResponseEntity deleteMyPagePhoto(
+            @SessionAttribute(name = SessionConstants.MEMBER_ID, required = false) Long memberId,
+            @PathVariable("postId") Long postId) {
+        log.info("마이 페이지 게시글 삭제 요청 : {}", postId);
+        if (memberId != null) {
+            myPagePhotoService.deleteMyPagePhoto(memberId, postId);
+            return ResponseEntity.ok("");
+        }
+        return ResponseEntity.badRequest().body("need login");
     }
 }
