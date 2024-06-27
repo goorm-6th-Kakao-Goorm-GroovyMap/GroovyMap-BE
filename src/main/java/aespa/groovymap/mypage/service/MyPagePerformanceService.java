@@ -3,10 +3,12 @@ package aespa.groovymap.mypage.service;
 import aespa.groovymap.domain.Coordinate;
 import aespa.groovymap.domain.Member;
 import aespa.groovymap.domain.post.MyPagePerformancePost;
+import aespa.groovymap.domain.post.Post;
 import aespa.groovymap.mypage.dto.MyPagePerformance.MyPagePerformanceRequestDto;
 import aespa.groovymap.mypage.dto.MyPagePerformance.MyPagePerformanceResponseDto;
 import aespa.groovymap.mypage.repository.MyPagePerformancePostRepository;
 import aespa.groovymap.repository.MemberRepository;
+import aespa.groovymap.repository.PostRepository;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +26,7 @@ public class MyPagePerformanceService {
 
     private final MemberRepository memberRepository;
     private final MyPagePerformancePostRepository myPagePerformancePostRepository;
+    private final PostRepository postRepository;
 
     public void writeMyPagePerformance(MyPagePerformanceRequestDto myPagePerformanceRequestDto, Long memberId) {
         Member member = memberRepository.findById(memberId)
@@ -109,5 +112,14 @@ public class MyPagePerformanceService {
         myPagePerformanceResponseDto.setLongitude(myPagePerformancePost.getCoordinate().getLongitude());
 
         return myPagePerformanceResponseDto;
+    }
+
+    public void deleteMyPagePerformance(Long postId) {
+        Post post = postRepository.findById(postId).orElseThrow(() -> new NoSuchElementException("Wrong Post Id"));
+
+        if (post instanceof MyPagePerformancePost) {
+            myPagePerformancePostRepository.delete((MyPagePerformancePost) post);
+        }
+        postRepository.delete(post);
     }
 }
