@@ -61,4 +61,16 @@ public class MyPagePhotoController {
         }
         return ResponseEntity.badRequest().body("need login");
     }
+
+    @PostMapping("/mypage/photo/{nickname}/{postId}/like")
+    public ResponseEntity likeMyPagePhoto(
+            @SessionAttribute(name = SessionConstants.MEMBER_ID, required = false) Long memberId,
+            @PathVariable("postId") Long postId) {
+        log.info("마이 페이지 게시글 좋아요 요청, 요청 member : {}", memberId);
+        if (memberId != null) {
+            myPagePhotoService.likeMyPagePhoto(memberId, postId);
+            return ResponseEntity.ok("");
+        }
+        return ResponseEntity.badRequest().body("need login");
+    }
 }

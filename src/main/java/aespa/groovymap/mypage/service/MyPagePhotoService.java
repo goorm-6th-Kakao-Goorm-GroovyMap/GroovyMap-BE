@@ -151,4 +151,8 @@ public class MyPagePhotoService {
         }
         postRepository.delete(post);
     }
+
+    public void likeMyPagePhoto(Long memberId, Long postId) {
+        
+    }
 }
