@@ -42,9 +42,9 @@ public class PromotionPost extends Post {
     private Set<MediaFile> imageSet = new HashSet<>();
 
     // 이미지 파일 추가 메서드
-    public void addImage(String uuid, String fileName, String filePath, String fileType) {
+    public void addImage(String fileName, String filePath, String fileType) {
         MediaFile mediaFile = MediaFile.builder()
-                .fileName(uuid + "_" + fileName) // 파일 이름 설정
+                .fileName(fileName) // 파일 이름 설정
                 .filePath(filePath) // 파일 경로 설정
                 .fileType(fileType) // 파일 타입 설정
                 .linkedPost(this) // 이 Post와 연결 설정

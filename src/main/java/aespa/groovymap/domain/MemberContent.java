@@ -24,7 +24,7 @@ public class MemberContent {
     private Long id;
 
     private String introduction;
-//    private MultipartFile profileImage;
+    private String profileImage;
 
     @OneToOne(mappedBy = "memberContent")
     private Member member;
