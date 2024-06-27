@@ -22,5 +22,13 @@ public interface PromotionPostRepository extends JpaRepository<PromotionPost, Lo
     @Query("update PromotionPost p set p.viewCount = p.viewCount + 1 where p.id = :id")
     int updateViews(@Param("id") Long id);
 
+    @Modifying
+    @Query("update PromotionPost p set p.savesCount = p.savesCount + 1 where p.id = :id")
+    int updateSaves(@Param("id") Long id);
+
+    @Modifying
+    @Query("update PromotionPost p set p.likesCount = p.likesCount + 1 where p.id = :id")
+    int updateLikes(@Param("id") Long id);
+
 }
 
