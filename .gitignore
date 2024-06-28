@@ -39,4 +39,5 @@ out/
 ### .properties file ###
 application-db.properties
 application-email.properties
+application-file.properties
 application-s3.properties

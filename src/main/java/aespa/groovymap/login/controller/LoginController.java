@@ -25,6 +25,7 @@ public class LoginController {
 
     @PostMapping("/login")
     public ResponseEntity login(@RequestBody LoginDto loginDto, HttpServletRequest request) {
+        log.info("로그인 시도");
         Member loginMember = loginService.login(loginDto.getEmail(), loginDto.getPassword());
 
         if (loginMember == null) {
@@ -45,16 +46,6 @@ public class LoginController {
         return ResponseEntity.ok().body("logout complete");
     }
 
-    @GetMapping("/login/test")
-    public ResponseEntity loginTest(
-            @SessionAttribute(name = SessionConstants.MEMBER_ID, required = false) Long memberId) {
-        if (memberId != null) {
-            return ResponseEntity.ok(memberId);
-        } else {
-            return ResponseEntity.ok("session end");
-        }
-    }
-
     @GetMapping("/memberInfo")
     public ResponseEntity getMemberInfo(
             @SessionAttribute(name = SessionConstants.MEMBER_ID, required = false) Long memberId) {
@@ -64,6 +55,16 @@ public class LoginController {
             return ResponseEntity.ok(memberInfoDto);
         } else {
             return ResponseEntity.ok("need login");
+        }
+    }
+
+    @GetMapping("/login/test")
+    public ResponseEntity loginTest(
+            @SessionAttribute(name = SessionConstants.MEMBER_ID, required = false) Long memberId) {
+        if (memberId != null) {
+            return ResponseEntity.ok(memberId);
+        } else {
+            return ResponseEntity.ok("session end");
         }
     }
 }
