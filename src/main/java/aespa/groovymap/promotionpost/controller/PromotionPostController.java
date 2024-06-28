@@ -1,5 +1,7 @@
 package aespa.groovymap.promotionpost.controller;
 
+import aespa.groovymap.config.SessionConstants;
+import aespa.groovymap.promotionpost.dto.MyListDto;
 import aespa.groovymap.promotionpost.dto.PromotionPostRequestDto;
 import aespa.groovymap.promotionpost.dto.PromotionPostResponseDto;
 import aespa.groovymap.promotionpost.service.PromotionPostService;
@@ -10,12 +12,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.SessionAttribute;
 
 @RestController
 @RequiredArgsConstructor
@@ -48,9 +52,17 @@ public class PromotionPostController {
     // 홍보게시판 게시글 등록
     @Operation(summary = "홍보 게시글 작성", description = "새로운 홍보 게시글을 작성합니다.")
     @PostMapping(value = "/write", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> writePost(@ModelAttribute PromotionPostResponseDto promotionPostResponseDto) {
+    public ResponseEntity<?> writePost(@ModelAttribute PromotionPostResponseDto promotionPostResponseDto,
+                                       @SessionAttribute(name = SessionConstants.MEMBER_ID, required = false) Long memberId) {
+
+        if (memberId == null) {
+            log.info("로그인이 필요합니다.");
+            return new ResponseEntity<>("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED); // 401 Unauthorized
+        }
+
         try {
-            PromotionPostRequestDto requestDto = promotionPostService.createPromotionPost(promotionPostResponseDto);
+            PromotionPostRequestDto requestDto = promotionPostService.createPromotionPost(promotionPostResponseDto,
+                    memberId);
             log.info("홍보게시판 게시글 등록 성공");
             return new ResponseEntity<>(requestDto, HttpStatus.CREATED); // 201 Created
         } catch (Exception e) {
@@ -86,5 +98,86 @@ public class PromotionPostController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 오류가 발생했습니다.");
         }
     }
+
+    // 홍보 게시판 글 저장 요청
+    @Operation(summary = "홍보 게시글 저장 요청", description = "홍보 게시글을 저장 요청합니다.")
+    @PostMapping("/{postId}/save")
+    public ResponseEntity<?> savePost(@PathVariable Long postId,
+                                      @SessionAttribute(name = SessionConstants.MEMBER_ID, required = false) Long memberId) {
+        if (memberId == null) {
+            log.info("로그인이 필요합니다.");
+            return new ResponseEntity<>("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED);
+        }
+
+        try {
+            promotionPostService.savePost(postId, memberId);
+            log.info("홍보게시판 게시글 저장 성공: postId = {}", postId);
+            return ResponseEntity.ok().body("홍보게시판 게시글 저장 성공");
+        } catch (Exception e) {
+            log.error("홍보게시판 게시글 저장 실패: postId = {}, error = {}", postId, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 오류가 발생했습니다.");
+        }
+    }
+
+    // 홍보 게시판 글 좋아요 요청
+    @Operation(summary = "홍보 게시글 좋아요 요청", description = "홍보 게시글에 좋아요를 요청합니다.")
+    @PostMapping("/{postId}/like")
+    public ResponseEntity<?> likePost(@PathVariable Long postId,
+                                      @SessionAttribute(name = SessionConstants.MEMBER_ID, required = false) Long memberId) {
+        if (memberId == null) {
+            log.info("로그인이 필요합니다.");
+            return new ResponseEntity<>("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED);
+        }
+
+        try {
+            promotionPostService.likePost(postId, memberId);
+            log.info("홍보게시판 게시글 좋아요 성공: postId = {}", postId);
+            return ResponseEntity.ok().body("홍보게시판 게시글 좋아요 성공");
+        } catch (Exception e) {
+            log.error("홍보게시판 게시글 좋아요 실패: postId = {}, error = {}", postId, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 오류가 발생했습니다.");
+        }
+    }
+
+    // 홍보 게시판 글 삭제 요청
+    @Operation(summary = "홍보 게시글 삭제 요청", description = "홍보 게시글을 삭제 요청합니다.")
+    @DeleteMapping("/{postId}/delete")
+    public ResponseEntity<?> deletePost(@PathVariable Long postId,
+                                        @SessionAttribute(name = SessionConstants.MEMBER_ID, required = false) Long memberId) {
+        if (memberId == null) {
+            log.info("로그인이 필요합니다.");
+            return new ResponseEntity<>("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED);
+        }
+
+        try {
+            promotionPostService.deletePost(postId, memberId);
+            log.info("홍보게시판 게시글 삭제 성공: postId = {}", postId);
+            return ResponseEntity.ok().body("홍보게시판 게시글 삭제 성공");
+        } catch (Exception e) {
+            log.error("홍보게시판 게시글 삭제 실패: postId = {}, error = {}", postId, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 오류가 발생했습니다.");
+        }
+    }
+
+    // 로그인한 사용자가 좋아요,저장한 홍보게시판 게시글 목록 조회
+    @Operation(summary = "사용자가 좋아요,저장한 홍보게시판 게시글 목록 조회", description = "사용자가 좋아요,저장한 홍보게시판 게시글 목록을 조회합니다.")
+    @GetMapping("/myList")
+    public ResponseEntity<?> getMyList(
+            @SessionAttribute(name = SessionConstants.MEMBER_ID, required = false) Long memberId) {
+        if (memberId == null) {
+            log.info("로그인이 필요합니다.");
+            return new ResponseEntity<>("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED);
+        }
+
+        try {
+            MyListDto myListDto = promotionPostService.getMyList(memberId);
+            log.info("사용자가 좋아요,저장한 홍보게시판 게시글 목록 조회 성공");
+            return ResponseEntity.ok().body(myListDto);
+        } catch (Exception e) {
+            log.error("사용자가 좋아요,저장한 홍보게시판 게시글 목록 조회 실패", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("사용자가 좋아요,저장한 홍보게시판 게시글 목록 조회 실패");
+        }
+    }
+
 
 }
