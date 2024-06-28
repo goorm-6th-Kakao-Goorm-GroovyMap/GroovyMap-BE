@@ -175,6 +175,7 @@ public class MyPagePhotoService {
         comment.setCommentAuthor(member);
         comment.setContent(text);
         comment.setCommentPost(post);
+        comment.setTimestamp(ZonedDateTime.now());
 
         commentRepository.save(comment);
         return comment;
