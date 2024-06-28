@@ -66,7 +66,7 @@ public class MyPagePhotoController {
         return ResponseEntity.badRequest().body("need login");
     }
 
-    @PostMapping("/mypage/photo/{nickname}/{postId}/like")
+    @PostMapping("/mypage/photo/{postId}/like")
     public ResponseEntity likeMyPagePhoto(
             @SessionAttribute(name = SessionConstants.MEMBER_ID, required = false) Long memberId,
             @PathVariable("postId") Long postId) {
@@ -83,7 +83,7 @@ public class MyPagePhotoController {
         return ResponseEntity.badRequest().body("need login");
     }
 
-    @PostMapping("/mypage/photo/{nickname}/{postId}/unlike")
+    @PostMapping("/mypage/photo/{postId}/unlike")
     public ResponseEntity unlikeMyPagePhoto(
             @SessionAttribute(name = SessionConstants.MEMBER_ID, required = false) Long memberId,
             @PathVariable("postId") Long postId) {

@@ -47,7 +47,7 @@ public class MyPagePhotoService {
         MemberContent memberContent = member.getMemberContent();
 
         List<MyPagePost> myPagePosts = memberContent.getMyPagePosts();
-        List<MyPagePhotoDto> myPagePhotoDtos = getMyPagePhotoDtos(myPagePosts);
+        List<MyPagePhotoDto> myPagePhotoDtos = getMyPagePhotoDtos(myPagePosts, memberContent);
 
         MyPagePhotosDto myPagePhotosDto = new MyPagePhotosDto();
         myPagePhotosDto.setMyPagePhotoDtos(myPagePhotoDtos);
@@ -55,7 +55,7 @@ public class MyPagePhotoService {
         return myPagePhotosDto;
     }
 
-    private List<MyPagePhotoDto> getMyPagePhotoDtos(List<MyPagePost> myPagePosts) {
+    private List<MyPagePhotoDto> getMyPagePhotoDtos(List<MyPagePost> myPagePosts, MemberContent memberContent) {
         List<MyPagePhotoDto> myPagePhotoDtos = new ArrayList<>();
 
         for (MyPagePost myPagePost : myPagePosts) {
@@ -63,10 +63,17 @@ public class MyPagePhotoService {
 
             myPagePhotoDto.setId(myPagePost.getId());
             myPagePhotoDto.setPhotoUrl(myPagePost.getPhotoUrl());
+            myPagePhotoDto.setLikes(myPagePost.getLikesCount());
+            myPagePhotoDto.setIsLiked(isLikedPost(memberContent, myPagePost.getId()));
 
             myPagePhotoDtos.add(myPagePhotoDto);
         }
         return myPagePhotoDtos;
+    }
+
+    private Boolean isLikedPost(MemberContent memberContent, Long myPagePostId) {
+        return memberContent.getLikedPosts().stream()
+                .anyMatch(likedPost -> likedPost.getLikedPost().getId().equals(myPagePostId));
     }
 
     public void writeMyPagePhoto(MyPagePhotoWriteDto myPagePhotoWriteDto, Long memberId) throws IOException {
@@ -115,8 +122,7 @@ public class MyPagePhotoService {
     }
 
     private void checkIsLiked(Long postId, Member member, MyPageOnePhotoDto myPageOnePhotoDto) {
-        Boolean isLikedPost = member.getMemberContent().getLikedPosts().stream()
-                .anyMatch(likedPost -> likedPost.getLikedPost().getId().equals(postId));
+        Boolean isLikedPost = isLikedPost(member.getMemberContent(), postId);
         myPageOnePhotoDto.setIsLiked(isLikedPost);
     }
 
@@ -208,8 +214,7 @@ public class MyPagePhotoService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new NoSuchElementException("Wrong Post Id"));
 
-        Boolean isLikedPost = member.getMemberContent().getLikedPosts().stream()
-                .anyMatch(likedPost -> likedPost.getLikedPost().getId().equals(postId));
+        Boolean isLikedPost = isLikedPost(member.getMemberContent(), postId);
 
         if (!isLikedPost) {
             likedPostLogic(member, post);
