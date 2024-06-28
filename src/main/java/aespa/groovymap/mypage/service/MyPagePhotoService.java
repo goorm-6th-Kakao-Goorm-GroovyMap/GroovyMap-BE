@@ -96,7 +96,9 @@ public class MyPagePhotoService {
         return myPagePost;
     }
 
-    public MyPageOnePhotoDto getMyPagePhoto(Long postId) {
+    public MyPageOnePhotoDto getMyPagePhoto(Long memberId, Long postId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NoSuchElementException("Wrong Member Id"));
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new NoSuchElementException("Wrong Post Id"));
 
@@ -104,11 +106,18 @@ public class MyPagePhotoService {
 
         if (post instanceof MyPagePost) {
             convertPostToMyPageOntPhotoDto(post, myPageOnePhotoDto);
+            checkIsLiked(postId, member, myPageOnePhotoDto);
         } else {
             throw new NoSuchElementException("MyPagePost Id is required, this id is not MyPagePost id");
         }
 
         return myPageOnePhotoDto;
+    }
+
+    private void checkIsLiked(Long postId, Member member, MyPageOnePhotoDto myPageOnePhotoDto) {
+        Boolean isLikedPost = member.getMemberContent().getLikedPosts().stream()
+                .anyMatch(likedPost -> likedPost.getLikedPost().getId().equals(postId));
+        myPageOnePhotoDto.setIsLiked(isLikedPost);
     }
 
     private void convertPostToMyPageOntPhotoDto(Post post, MyPageOnePhotoDto myPageOnePhotoDto) {
@@ -142,7 +151,8 @@ public class MyPagePhotoService {
     }
 
     public void deleteMyPagePhoto(Long memberId, Long postId) {
-        Post post = postRepository.findById(postId).orElseThrow(() -> new NoSuchElementException("Wrong Post Id"));
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new NoSuchElementException("Wrong Post Id"));
 
         if (post.getAuthor().getId() == memberId) {
             deleteMyPagePhotoPost(post);
