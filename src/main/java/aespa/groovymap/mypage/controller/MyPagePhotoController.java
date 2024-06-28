@@ -81,6 +81,23 @@ public class MyPagePhotoController {
         return ResponseEntity.badRequest().body("need login");
     }
 
+    @PostMapping("/mypage/photo/{nickname}/{postId}/unlike")
+    public ResponseEntity unlikeMyPagePhoto(
+            @SessionAttribute(name = SessionConstants.MEMBER_ID, required = false) Long memberId,
+            @PathVariable("postId") Long postId) {
+        log.info("마이 페이지 게시글 좋아요 취소 요청, 요청 member : {}", memberId);
+        if (memberId != null) {
+            Boolean likedSuccess = myPagePhotoService.unlikeMyPagePhoto(memberId, postId);
+
+            if (likedSuccess) {
+                return ResponseEntity.ok("post unlike success");
+            } else {
+                return ResponseEntity.badRequest().body("not liked post");
+            }
+        }
+        return ResponseEntity.badRequest().body("need login");
+    }
+
     @PostMapping("/mypage/photo/{postId}/comments")
     public ResponseEntity writeComment(
             @SessionAttribute(name = SessionConstants.MEMBER_ID, required = false) Long memberId,

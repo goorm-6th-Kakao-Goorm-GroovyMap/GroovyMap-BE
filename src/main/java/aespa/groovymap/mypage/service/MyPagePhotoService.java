@@ -160,35 +160,6 @@ public class MyPagePhotoService {
         postRepository.delete(post);
     }
 
-    public Boolean likeMyPagePhoto(Long memberId, Long postId) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new NoSuchElementException("Wrong Member Id"));
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new NoSuchElementException("Wrong Post Id"));
-
-        List<LikedPost> likedPosts = member.getMemberContent().getLikedPosts();
-        Boolean isLikedPost = likedPosts.stream()
-                .anyMatch(likedPost -> likedPost.getLikedPost().getId().equals(postId));
-
-        if (!isLikedPost) {
-            LikedPost likedPost = makeLikedPost(member, post);
-            likedPosts.add(likedPost);
-            post.increaseLikesCount();
-
-            likedPostRepository.save(likedPost);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    private LikedPost makeLikedPost(Member member, Post post) {
-        LikedPost likedPost = new LikedPost();
-        likedPost.setLikedMemberContent(member.getMemberContent());
-        likedPost.setLikedPost(post);
-        return likedPost;
-    }
-
     public void writeComment(Long memberId, Long postId, String text) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NoSuchElementException("Wrong Member Id"));
@@ -218,5 +189,60 @@ public class MyPagePhotoService {
         } else {
             throw new SecurityException("cannot delete other user's post");
         }
+    }
+
+    public Boolean likeMyPagePhoto(Long memberId, Long postId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NoSuchElementException("Wrong Member Id"));
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new NoSuchElementException("Wrong Post Id"));
+
+        Boolean isLikedPost = member.getMemberContent().getLikedPosts().stream()
+                .anyMatch(likedPost -> likedPost.getLikedPost().getId().equals(postId));
+
+        if (!isLikedPost) {
+            likedPostLogic(member, post);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private void likedPostLogic(Member member, Post post) {
+        LikedPost likedPost = makeLikedPost(member, post);
+        member.getMemberContent().getLikedPosts().add(likedPost);
+        post.increaseLikesCount();
+
+        likedPostRepository.save(likedPost);
+    }
+
+    private LikedPost makeLikedPost(Member member, Post post) {
+        LikedPost likedPost = new LikedPost();
+        likedPost.setLikedMemberContent(member.getMemberContent());
+        likedPost.setLikedPost(post);
+        return likedPost;
+    }
+
+
+    public Boolean unlikeMyPagePhoto(Long memberId, Long postId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NoSuchElementException("Wrong Member Id"));
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new NoSuchElementException("Wrong Post Id"));
+
+        MemberContent memberContent = member.getMemberContent();
+        List<LikedPost> likedPosts = memberContent.getLikedPosts();
+
+        boolean removed = likedPosts.removeIf(likedPost -> {
+            if (likedPost.getLikedPost().getId().equals(postId)) {
+                likedPostRepository.delete(likedPost);
+                post.decreaseLikesCount();
+                return true;
+            } else {
+                return false;
+            }
+        });
+
+        return removed;
     }
 }
