@@ -3,6 +3,7 @@ package aespa.groovymap.mypage.service;
 import aespa.groovymap.domain.Comment;
 import aespa.groovymap.domain.Member;
 import aespa.groovymap.domain.MemberContent;
+import aespa.groovymap.domain.post.LikedPost;
 import aespa.groovymap.domain.post.MyPagePost;
 import aespa.groovymap.domain.post.Post;
 import aespa.groovymap.mypage.dto.MyPagePhoto.MyPageOnePhotoDto;
@@ -12,6 +13,7 @@ import aespa.groovymap.mypage.dto.MyPagePhoto.MyPagePhotoWriteDto;
 import aespa.groovymap.mypage.dto.MyPagePhoto.MyPagePhotosDto;
 import aespa.groovymap.mypage.repository.MyPagePostRepository;
 import aespa.groovymap.repository.CommentRepository;
+import aespa.groovymap.repository.LikedPostRepository;
 import aespa.groovymap.repository.MemberRepository;
 import aespa.groovymap.repository.PostRepository;
 import aespa.groovymap.uploadutil.util.FileUpload;
@@ -36,6 +38,7 @@ public class MyPagePhotoService {
     private final MemberRepository memberRepository;
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
+    private final LikedPostRepository likedPostRepository;
     private final FileUpload fileUpload;
 
     public MyPagePhotosDto getMyPagePhotos(String nickname) {
@@ -157,14 +160,40 @@ public class MyPagePhotoService {
         postRepository.delete(post);
     }
 
-    public void likeMyPagePhoto(Long memberId, Long postId) {
+    public Boolean likeMyPagePhoto(Long memberId, Long postId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NoSuchElementException("Wrong Member Id"));
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new NoSuchElementException("Wrong Post Id"));
 
+        List<LikedPost> likedPosts = member.getMemberContent().getLikedPosts();
+        Boolean isLikedPost = likedPosts.stream()
+                .anyMatch(likedPost -> likedPost.getLikedPost().getId().equals(postId));
+
+        if (!isLikedPost) {
+            LikedPost likedPost = makeLikedPost(member, post);
+            likedPosts.add(likedPost);
+            post.increaseLikesCount();
+
+            likedPostRepository.save(likedPost);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private LikedPost makeLikedPost(Member member, Post post) {
+        LikedPost likedPost = new LikedPost();
+        likedPost.setLikedMemberContent(member.getMemberContent());
+        likedPost.setLikedPost(post);
+        return likedPost;
     }
 
     public void writeComment(Long memberId, Long postId, String text) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NoSuchElementException("Wrong Member Id"));
-        Post post = postRepository.findById(postId).orElseThrow(() -> new NoSuchElementException("Wrong Post Id"));
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new NoSuchElementException("Wrong Post Id"));
 
         Comment comment = makeComment(text, member, post);
         post.getComments().add(comment);

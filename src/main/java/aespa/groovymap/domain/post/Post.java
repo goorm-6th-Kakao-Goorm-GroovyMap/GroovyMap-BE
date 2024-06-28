@@ -52,5 +52,7 @@ public class Post {
 
     private ZonedDateTime timestamp;
 
-
+    public void increaseLikesCount() {
+        this.likesCount++;
+    }
 }

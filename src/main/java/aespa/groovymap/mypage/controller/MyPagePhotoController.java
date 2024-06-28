@@ -70,8 +70,13 @@ public class MyPagePhotoController {
             @PathVariable("postId") Long postId) {
         log.info("마이 페이지 게시글 좋아요 요청, 요청 member : {}", memberId);
         if (memberId != null) {
-            myPagePhotoService.likeMyPagePhoto(memberId, postId);
-            return ResponseEntity.ok("");
+            Boolean likedSuccess = myPagePhotoService.likeMyPagePhoto(memberId, postId);
+
+            if (likedSuccess) {
+                return ResponseEntity.ok("post like success");
+            } else {
+                return ResponseEntity.badRequest().body("already liked post");
+            }
         }
         return ResponseEntity.badRequest().body("need login");
     }
