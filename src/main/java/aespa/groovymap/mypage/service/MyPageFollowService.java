@@ -3,8 +3,10 @@ package aespa.groovymap.mypage.service;
 import aespa.groovymap.domain.Follow;
 import aespa.groovymap.domain.Member;
 import aespa.groovymap.mypage.dto.MyPageFollow.MyPageFollowDto;
+import aespa.groovymap.mypage.dto.MyPageFollow.MyPageFollowResponseDto;
 import aespa.groovymap.repository.FollowRepository;
 import aespa.groovymap.repository.MemberRepository;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
@@ -99,5 +101,71 @@ public class MyPageFollowService {
             }
         });
         return removed;
+    }
+
+    public List<MyPageFollowResponseDto> getFollowers(String nickname) {
+        Member member = memberRepository.findByNickname(nickname)
+                .orElseThrow(() -> new NoSuchElementException("Wrong Member nickname"));
+
+        List<Follow> myFollowers = member.getFollowers();
+
+        List<MyPageFollowResponseDto> myPageFollowResponseDtos
+                = getMyPageFollowerResponseDtos(myFollowers);
+
+        return myPageFollowResponseDtos;
+    }
+
+    private List<MyPageFollowResponseDto> getMyPageFollowerResponseDtos(List<Follow> myFollowers) {
+        List<MyPageFollowResponseDto> myPageFollowResponseDtos = new ArrayList<>();
+
+        for (Follow myFollower : myFollowers) {
+            MyPageFollowResponseDto myPageFollowResponseDto
+                    = getMyPageFollowerResponseDto(myFollower);
+
+            myPageFollowResponseDtos.add(myPageFollowResponseDto);
+        }
+        return myPageFollowResponseDtos;
+    }
+
+    private MyPageFollowResponseDto getMyPageFollowerResponseDto(Follow myFollower) {
+        MyPageFollowResponseDto myPageFollowResponseDto = new MyPageFollowResponseDto();
+
+        Member myFollowerMember = myFollower.getFollowing();
+        myPageFollowResponseDto.setNickname(myFollowerMember.getNickname());
+        myPageFollowResponseDto.setProfileImage(myFollowerMember.getMemberContent().getProfileImage());
+        return myPageFollowResponseDto;
+    }
+
+    public List<MyPageFollowResponseDto> getFollowing(String nickname) {
+        Member member = memberRepository.findByNickname(nickname)
+                .orElseThrow(() -> new NoSuchElementException("Wrong Member nickname"));
+
+        List<Follow> myFollowings = member.getFollowing();
+
+        List<MyPageFollowResponseDto> myPageFollowResponseDtos
+                = getMyPageFollowingResponseDtos(myFollowings);
+
+        return myPageFollowResponseDtos;
+    }
+
+    private List<MyPageFollowResponseDto> getMyPageFollowingResponseDtos(List<Follow> myFollowings) {
+        List<MyPageFollowResponseDto> myPageFollowResponseDtos = new ArrayList<>();
+
+        for (Follow myFollowing : myFollowings) {
+            MyPageFollowResponseDto myPageFollowResponseDto
+                    = getMyPageFollowingResponseDto(myFollowing);
+
+            myPageFollowResponseDtos.add(myPageFollowResponseDto);
+        }
+        return myPageFollowResponseDtos;
+    }
+
+    private MyPageFollowResponseDto getMyPageFollowingResponseDto(Follow myFollowing) {
+        MyPageFollowResponseDto myPageFollowResponseDto = new MyPageFollowResponseDto();
+
+        Member myFollowingMember = myFollowing.getFollower();
+        myPageFollowResponseDto.setNickname(myFollowingMember.getNickname());
+        myPageFollowResponseDto.setProfileImage(myFollowingMember.getMemberContent().getProfileImage());
+        return myPageFollowResponseDto;
     }
 }
