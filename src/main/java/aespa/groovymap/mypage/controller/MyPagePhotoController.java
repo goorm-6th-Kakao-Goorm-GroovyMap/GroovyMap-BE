@@ -25,9 +25,11 @@ public class MyPagePhotoController {
     private final MyPagePhotoService myPagePhotoService;
 
     @GetMapping("/mypage/photo/{nickname}")
-    public ResponseEntity getMyPagePhotos(@PathVariable("nickname") String nickname) {
+    public ResponseEntity getMyPagePhotos(
+            @SessionAttribute(name = SessionConstants.MEMBER_ID, required = false) Long memberId,
+            @PathVariable("nickname") String nickname) {
         log.info("마이 페이지 게시물 목록 요청");
-        MyPagePhotosDto myPagePhotosDto = myPagePhotoService.getMyPagePhotos(nickname);
+        MyPagePhotosDto myPagePhotosDto = myPagePhotoService.getMyPagePhotos(memberId, nickname);
         return ResponseEntity.ok(myPagePhotosDto);
     }
 

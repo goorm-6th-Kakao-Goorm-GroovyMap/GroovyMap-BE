@@ -36,13 +36,17 @@ public class MyPagePhotoService {
     private final PostRepository postRepository;
     private final FileUpload fileUpload;
 
-    public MyPagePhotosDto getMyPagePhotos(String nickname) {
+    public MyPagePhotosDto getMyPagePhotos(Long memberId, String nickname) {
         Member member = memberRepository.findByNickname(nickname)
                 .orElseThrow(() -> new NoSuchElementException("Wrong nickname"));
         MemberContent memberContent = member.getMemberContent();
 
+        Member loginMember = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NoSuchElementException("Wrong Member Id"));
+        MemberContent loginMemberContent = loginMember.getMemberContent();
+
         List<MyPagePost> myPagePosts = memberContent.getMyPagePosts();
-        List<MyPagePhotoDto> myPagePhotoDtos = getMyPagePhotoDtos(myPagePosts, memberContent);
+        List<MyPagePhotoDto> myPagePhotoDtos = getMyPagePhotoDtos(myPagePosts, memberContent, loginMemberContent);
 
         MyPagePhotosDto myPagePhotosDto = new MyPagePhotosDto();
         myPagePhotosDto.setMyPagePhotoDtos(myPagePhotoDtos);
@@ -50,7 +54,8 @@ public class MyPagePhotoService {
         return myPagePhotosDto;
     }
 
-    private List<MyPagePhotoDto> getMyPagePhotoDtos(List<MyPagePost> myPagePosts, MemberContent memberContent) {
+    private List<MyPagePhotoDto> getMyPagePhotoDtos
+            (List<MyPagePost> myPagePosts, MemberContent memberContent, MemberContent loginMemberContent) {
         List<MyPagePhotoDto> myPagePhotoDtos = new ArrayList<>();
 
         for (MyPagePost myPagePost : myPagePosts) {
@@ -59,7 +64,7 @@ public class MyPagePhotoService {
             myPagePhotoDto.setId(myPagePost.getId());
             myPagePhotoDto.setPhotoUrl(myPagePost.getPhotoUrl());
             myPagePhotoDto.setLikes(myPagePost.getLikesCount());
-            myPagePhotoDto.setIsLiked(isLikedPost(memberContent, myPagePost.getId()));
+            myPagePhotoDto.setIsLiked(isLikedPost(loginMemberContent, myPagePost.getId()));
 
             myPagePhotoDtos.add(myPagePhotoDto);
         }
