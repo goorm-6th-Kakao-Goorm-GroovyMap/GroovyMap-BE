@@ -3,6 +3,7 @@ package aespa.groovymap.mypage.service;
 import aespa.groovymap.domain.Comment;
 import aespa.groovymap.domain.Member;
 import aespa.groovymap.domain.MemberContent;
+import aespa.groovymap.domain.post.LikedPost;
 import aespa.groovymap.domain.post.MyPagePost;
 import aespa.groovymap.domain.post.Post;
 import aespa.groovymap.mypage.dto.MyPagePhoto.MyPageOnePhotoDto;
@@ -11,6 +12,7 @@ import aespa.groovymap.mypage.dto.MyPagePhoto.MyPagePhotoDto;
 import aespa.groovymap.mypage.dto.MyPagePhoto.MyPagePhotoWriteDto;
 import aespa.groovymap.mypage.dto.MyPagePhoto.MyPagePhotosDto;
 import aespa.groovymap.mypage.repository.MyPagePostRepository;
+import aespa.groovymap.repository.LikedPostRepository;
 import aespa.groovymap.repository.MemberRepository;
 import aespa.groovymap.repository.PostRepository;
 import aespa.groovymap.upload.dto.SingleFileDto;
@@ -36,6 +38,7 @@ public class MyPagePhotoService {
     private final MyPagePostRepository myPagePostRepository;
     private final MemberRepository memberRepository;
     private final PostRepository postRepository;
+    private final LikedPostRepository likedPostRepository;
     //private final FileUpload fileUpload;
     private final UpDownService upDownService;
 
@@ -171,6 +174,9 @@ public class MyPagePhotoService {
                 .orElseThrow(() -> new NoSuchElementException("Wrong Post Id"));
 
         if (post.getAuthor().getId() == memberId) {
+            // 해당 글에 대한 모든 좋아요 기록 삭제
+            List<LikedPost> likedPosts = likedPostRepository.findByLikedPost(post);
+            likedPosts.forEach(likedPostRepository::delete);
             deleteMyPagePhotoPost(post);
         } else {
             throw new SecurityException("cannot delete other user's post");
