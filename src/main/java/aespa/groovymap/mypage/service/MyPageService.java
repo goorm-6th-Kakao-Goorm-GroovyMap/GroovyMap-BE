@@ -6,13 +6,15 @@ import aespa.groovymap.mypage.dto.MyPageInfoDto;
 import aespa.groovymap.mypage.dto.MyPageInfoUpdateRequestDto;
 import aespa.groovymap.mypage.dto.MyPageInfoUpdateResponseDto;
 import aespa.groovymap.repository.MemberRepository;
-import aespa.groovymap.uploadutil.util.FileUpload;
+import aespa.groovymap.upload.dto.SingleFileDto;
+import aespa.groovymap.upload.service.UpDownService;
 import java.io.IOException;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @Service
@@ -21,7 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class MyPageService {
 
     private final MemberRepository memberRepository;
-    private final FileUpload fileUpload;
+    //private final FileUpload fileUpload;
+    private final UpDownService upDownService;
 
     public MyPageInfoDto getMyPageInfo(String nickname) {
         Member member = memberRepository.findByNickname(nickname)
@@ -79,7 +82,8 @@ public class MyPageService {
     private void setMemberContentInfo(MyPageInfoUpdateRequestDto myPageInfoUpdateRequestDto,
                                       MemberContent memberContent)
             throws IOException {
-        memberContent.setProfileImage(fileUpload.saveFile(myPageInfoUpdateRequestDto.getProfileImage()));
+        //memberContent.setProfileImage(fileUpload.saveFile(myPageInfoUpdateRequestDto.getProfileImage()));
+        memberContent.setProfileImage(uploadFile(myPageInfoUpdateRequestDto.getProfileImage()));
         memberContent.setIntroduction(myPageInfoUpdateRequestDto.getIntroduction());
     }
 
@@ -88,5 +92,11 @@ public class MyPageService {
         member.setRegion(myPageInfoUpdateRequestDto.getRegion());
         member.setCategory(myPageInfoUpdateRequestDto.getPart());
         member.setType(myPageInfoUpdateRequestDto.getType());
+    }
+
+    private String uploadFile(MultipartFile profileImage) {
+        SingleFileDto singleFileDto = new SingleFileDto();
+        singleFileDto.setFile(profileImage);
+        return upDownService.uploadSingleFile(singleFileDto).getFilePath();
     }
 }

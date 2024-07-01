@@ -13,7 +13,8 @@ import aespa.groovymap.mypage.dto.MyPagePhoto.MyPagePhotosDto;
 import aespa.groovymap.mypage.repository.MyPagePostRepository;
 import aespa.groovymap.repository.MemberRepository;
 import aespa.groovymap.repository.PostRepository;
-import aespa.groovymap.uploadutil.util.FileUpload;
+import aespa.groovymap.upload.dto.SingleFileDto;
+import aespa.groovymap.upload.service.UpDownService;
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -24,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @Service
@@ -34,7 +36,8 @@ public class MyPagePhotoService {
     private final MyPagePostRepository myPagePostRepository;
     private final MemberRepository memberRepository;
     private final PostRepository postRepository;
-    private final FileUpload fileUpload;
+    //private final FileUpload fileUpload;
+    private final UpDownService upDownService;
 
     public MyPagePhotosDto getMyPagePhotos(Long memberId, String nickname) {
         Member member = memberRepository.findByNickname(nickname)
@@ -98,9 +101,16 @@ public class MyPagePhotoService {
         myPagePost.setTitle("");
         myPagePost.setViewCount(0);
         myPagePost.setContent(myPagePhotoWriteDto.getText());
-        myPagePost.setPhotoUrl(fileUpload.saveFile(myPagePhotoWriteDto.getImage()));
+        //myPagePost.setPhotoUrl(fileUpload.saveFile(myPagePhotoWriteDto.getImage()));
+        myPagePost.setPhotoUrl(uploadFile(myPagePhotoWriteDto.getImage()));
 
         return myPagePost;
+    }
+
+    private String uploadFile(MultipartFile profileImage) {
+        SingleFileDto singleFileDto = new SingleFileDto();
+        singleFileDto.setFile(profileImage);
+        return upDownService.uploadSingleFile(singleFileDto).getFilePath();
     }
 
     public MyPageOnePhotoDto getMyPagePhoto(Long memberId, Long postId) {
