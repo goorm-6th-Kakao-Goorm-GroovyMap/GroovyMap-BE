@@ -6,4 +6,6 @@ import lombok.Data;
 public class MyPagePhotoDto {
     private Long id;
     private String photoUrl;
+    private Integer likes;
+    private Boolean isLiked;
 }
