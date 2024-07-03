@@ -12,11 +12,11 @@ import aespa.groovymap.mypage.dto.MyPagePhoto.MyPagePhotoDto;
 import aespa.groovymap.mypage.dto.MyPagePhoto.MyPagePhotoWriteDto;
 import aespa.groovymap.mypage.dto.MyPagePhoto.MyPagePhotosDto;
 import aespa.groovymap.mypage.repository.MyPagePostRepository;
-import aespa.groovymap.repository.CommentRepository;
 import aespa.groovymap.repository.LikedPostRepository;
 import aespa.groovymap.repository.MemberRepository;
 import aespa.groovymap.repository.PostRepository;
-import aespa.groovymap.uploadutil.util.FileUpload;
+import aespa.groovymap.upload.dto.SingleFileDto;
+import aespa.groovymap.upload.service.UpDownService;
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -27,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @Service
@@ -37,17 +38,21 @@ public class MyPagePhotoService {
     private final MyPagePostRepository myPagePostRepository;
     private final MemberRepository memberRepository;
     private final PostRepository postRepository;
-    private final CommentRepository commentRepository;
     private final LikedPostRepository likedPostRepository;
-    private final FileUpload fileUpload;
+    //private final FileUpload fileUpload;
+    private final UpDownService upDownService;
 
-    public MyPagePhotosDto getMyPagePhotos(String nickname) {
+    public MyPagePhotosDto getMyPagePhotos(Long memberId, String nickname) {
         Member member = memberRepository.findByNickname(nickname)
                 .orElseThrow(() -> new NoSuchElementException("Wrong nickname"));
         MemberContent memberContent = member.getMemberContent();
 
+        Member loginMember = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NoSuchElementException("Wrong Member Id"));
+        MemberContent loginMemberContent = loginMember.getMemberContent();
+
         List<MyPagePost> myPagePosts = memberContent.getMyPagePosts();
-        List<MyPagePhotoDto> myPagePhotoDtos = getMyPagePhotoDtos(myPagePosts);
+        List<MyPagePhotoDto> myPagePhotoDtos = getMyPagePhotoDtos(myPagePosts, memberContent, loginMemberContent);
 
         MyPagePhotosDto myPagePhotosDto = new MyPagePhotosDto();
         myPagePhotosDto.setMyPagePhotoDtos(myPagePhotoDtos);
@@ -55,7 +60,8 @@ public class MyPagePhotoService {
         return myPagePhotosDto;
     }
 
-    private List<MyPagePhotoDto> getMyPagePhotoDtos(List<MyPagePost> myPagePosts) {
+    private List<MyPagePhotoDto> getMyPagePhotoDtos
+            (List<MyPagePost> myPagePosts, MemberContent memberContent, MemberContent loginMemberContent) {
         List<MyPagePhotoDto> myPagePhotoDtos = new ArrayList<>();
 
         for (MyPagePost myPagePost : myPagePosts) {
@@ -63,10 +69,17 @@ public class MyPagePhotoService {
 
             myPagePhotoDto.setId(myPagePost.getId());
             myPagePhotoDto.setPhotoUrl(myPagePost.getPhotoUrl());
+            myPagePhotoDto.setLikes(myPagePost.getLikesCount());
+            myPagePhotoDto.setIsLiked(isLikedPost(loginMemberContent, myPagePost.getId()));
 
             myPagePhotoDtos.add(myPagePhotoDto);
         }
         return myPagePhotoDtos;
+    }
+
+    private Boolean isLikedPost(MemberContent memberContent, Long myPagePostId) {
+        return memberContent.getLikedPosts().stream()
+                .anyMatch(likedPost -> likedPost.getLikedPost().getId().equals(myPagePostId));
     }
 
     public void writeMyPagePhoto(MyPagePhotoWriteDto myPagePhotoWriteDto, Long memberId) throws IOException {
@@ -91,12 +104,21 @@ public class MyPagePhotoService {
         myPagePost.setTitle("");
         myPagePost.setViewCount(0);
         myPagePost.setContent(myPagePhotoWriteDto.getText());
-        myPagePost.setPhotoUrl(fileUpload.saveFile(myPagePhotoWriteDto.getImage()));
+        //myPagePost.setPhotoUrl(fileUpload.saveFile(myPagePhotoWriteDto.getImage()));
+        myPagePost.setPhotoUrl(uploadFile(myPagePhotoWriteDto.getImage()));
 
         return myPagePost;
     }
 
-    public MyPageOnePhotoDto getMyPagePhoto(Long postId) {
+    private String uploadFile(MultipartFile profileImage) {
+        SingleFileDto singleFileDto = new SingleFileDto();
+        singleFileDto.setFile(profileImage);
+        return upDownService.uploadSingleFile(singleFileDto).getFilePath();
+    }
+
+    public MyPageOnePhotoDto getMyPagePhoto(Long memberId, Long postId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NoSuchElementException("Wrong Member Id"));
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new NoSuchElementException("Wrong Post Id"));
 
@@ -104,11 +126,17 @@ public class MyPagePhotoService {
 
         if (post instanceof MyPagePost) {
             convertPostToMyPageOntPhotoDto(post, myPageOnePhotoDto);
+            checkIsLiked(postId, member, myPageOnePhotoDto);
         } else {
             throw new NoSuchElementException("MyPagePost Id is required, this id is not MyPagePost id");
         }
 
         return myPageOnePhotoDto;
+    }
+
+    private void checkIsLiked(Long postId, Member member, MyPageOnePhotoDto myPageOnePhotoDto) {
+        Boolean isLikedPost = isLikedPost(member.getMemberContent(), postId);
+        myPageOnePhotoDto.setIsLiked(isLikedPost);
     }
 
     private void convertPostToMyPageOntPhotoDto(Post post, MyPageOnePhotoDto myPageOnePhotoDto) {
@@ -142,9 +170,13 @@ public class MyPagePhotoService {
     }
 
     public void deleteMyPagePhoto(Long memberId, Long postId) {
-        Post post = postRepository.findById(postId).orElseThrow(() -> new NoSuchElementException("Wrong Post Id"));
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new NoSuchElementException("Wrong Post Id"));
 
         if (post.getAuthor().getId() == memberId) {
+            // 해당 글에 대한 모든 좋아요 기록 삭제
+            List<LikedPost> likedPosts = likedPostRepository.findByLikedPost(post);
+            likedPosts.forEach(likedPostRepository::delete);
             deleteMyPagePhotoPost(post);
         } else {
             throw new SecurityException("cannot delete other user's post");
@@ -158,65 +190,5 @@ public class MyPagePhotoService {
             throw new NoSuchElementException("Wrong post id, you need to send MyPagePhotoId");
         }
         postRepository.delete(post);
-    }
-
-    public Boolean likeMyPagePhoto(Long memberId, Long postId) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new NoSuchElementException("Wrong Member Id"));
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new NoSuchElementException("Wrong Post Id"));
-
-        List<LikedPost> likedPosts = member.getMemberContent().getLikedPosts();
-        Boolean isLikedPost = likedPosts.stream()
-                .anyMatch(likedPost -> likedPost.getLikedPost().getId().equals(postId));
-
-        if (!isLikedPost) {
-            LikedPost likedPost = makeLikedPost(member, post);
-            likedPosts.add(likedPost);
-            post.increaseLikesCount();
-
-            likedPostRepository.save(likedPost);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    private LikedPost makeLikedPost(Member member, Post post) {
-        LikedPost likedPost = new LikedPost();
-        likedPost.setLikedMemberContent(member.getMemberContent());
-        likedPost.setLikedPost(post);
-        return likedPost;
-    }
-
-    public void writeComment(Long memberId, Long postId, String text) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new NoSuchElementException("Wrong Member Id"));
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new NoSuchElementException("Wrong Post Id"));
-
-        Comment comment = makeComment(text, member, post);
-        post.getComments().add(comment);
-    }
-
-    private Comment makeComment(String text, Member member, Post post) {
-        Comment comment = new Comment();
-        comment.setCommentAuthor(member);
-        comment.setContent(text);
-        comment.setCommentPost(post);
-
-        commentRepository.save(comment);
-        return comment;
-    }
-
-    public void deleteMyPagePhotoComment(Long memberId, Long commentId) {
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new NoSuchElementException("Wrong Comment Id"));
-
-        if (comment.getCommentAuthor().getId() == memberId) {
-            commentRepository.delete(comment);
-        } else {
-            throw new SecurityException("cannot delete other user's post");
-        }
     }
 }
