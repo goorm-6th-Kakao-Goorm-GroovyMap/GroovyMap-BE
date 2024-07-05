@@ -55,4 +55,10 @@ public class Post {
     public void increaseLikesCount() {
         this.likesCount++;
     }
+
+    public void decreaseLikesCount() {
+        if (likesCount > 0) {
+            this.likesCount--;
+        }
+    }
 }

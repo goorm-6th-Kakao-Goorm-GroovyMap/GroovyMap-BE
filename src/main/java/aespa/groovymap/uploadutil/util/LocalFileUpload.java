@@ -25,7 +25,17 @@ public class LocalFileUpload implements FileUpload {
             fullPath = multipartFile.getOriginalFilename();
             multipartFile.transferTo(new File(getFullPath(fullPath)));
         }
-        return "/images/" + fullPath;
+
+        String fileExtension = fullPath.substring(fullPath.lastIndexOf(".") + 1);
+        if (fileExtension.equals("jpeg") || fileExtension.equals("png") || fileExtension.equals("gif")
+                || fileExtension.equals("webp") || fileExtension.equals("svg") || fileExtension.equals("avif")) {
+            return "/images/" + fullPath;
+        } else if (fileExtension.equals("mp4") || fileExtension.equals("mov")
+                || fileExtension.equals("avi") || fileExtension.equals("mkv")) {
+            return "/videos/" + fullPath;
+        } else {
+            return "/images/" + fullPath;
+        }
     }
 
 }
