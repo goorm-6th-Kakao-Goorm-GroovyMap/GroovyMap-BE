@@ -1,4 +1,4 @@
-package aespa.groovymap.recruitment.dto;
+package aespa.groovymap.recruitment.dto.comment;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
@@ -13,8 +13,8 @@ import lombok.Setter;
 public class CommentRequestDto {
     @NotNull(message = "Post ID는 null이 될 수 없습니다.")
     private Long postId;
-    @NotNull(message = "Author ID는 null이 될 수 없습니다.")
-    private Long authorId;
+    @NotNull(message = "commentAuthor nickname은 null이 될 수 없습니다.")
+    private String commentAuthor;
     private String content;
     private String date;
 }

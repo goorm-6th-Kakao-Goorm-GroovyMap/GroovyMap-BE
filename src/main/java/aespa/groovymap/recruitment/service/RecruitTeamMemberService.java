@@ -1,10 +1,12 @@
 package aespa.groovymap.recruitment.service;
 
 import aespa.groovymap.domain.Coordinate;
+import aespa.groovymap.domain.Member;
 import aespa.groovymap.domain.post.RecruitTeamMemberPost;
 import aespa.groovymap.recruitment.dto.RecruitTeamMemberRequestDto;
 import aespa.groovymap.recruitment.dto.RecruitTeamMemberResponseDto;
 import aespa.groovymap.recruitment.repository.RecruitTeamMemberRepository;
+import aespa.groovymap.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +22,7 @@ import java.util.stream.Collectors;
 public class RecruitTeamMemberService {
 
     private final RecruitTeamMemberRepository recruitTeamMemberRepository;
+    private final MemberRepository memberRepository;
 
     // 팀원 모집 목록 요청
     public List<RecruitTeamMemberRequestDto> findAll() {
@@ -33,12 +36,12 @@ public class RecruitTeamMemberService {
         return RecruitTeamMemberRequestDto.builder()
                 .id(recruitTeamMemberPost.getId()) // 아이디 설정
                 .title(recruitTeamMemberPost.getTitle()) // 제목 설정
-//                .author(recruitTeamMemberPost.getAuthor()) // 글쓴이 설정
+                .author(recruitTeamMemberPost.getAuthor().getNickname()) // 글쓴이 설정
                 .content(recruitTeamMemberPost.getContent()) // 내용 설정
                 .region(recruitTeamMemberPost.getRegion()) // 활동지역명 설정
                 .field(recruitTeamMemberPost.getCategory()) // 분야 설정
                 .part(recruitTeamMemberPost.getType()) // 유형 설정
-                .coordinates(recruitTeamMemberPost.getCoordinate()) // 좌표 설정
+//                .coordinates(recruitTeamMemberPost.getCoordinate()) // 좌표 설정
                 .recruitNum(recruitTeamMemberPost.getRecruitNum()) // 모집 인원 설정
                 .timeStamp(recruitTeamMemberPost.getTimestamp()) // 날짜 설정
                 .viewCount(recruitTeamMemberPost.getViewCount()) // 조회수 설정
@@ -58,18 +61,22 @@ public class RecruitTeamMemberService {
 
     // 팀원 모집 게시글 등록
     public RecruitTeamMemberRequestDto createRecruitTeamMember(RecruitTeamMemberResponseDto recruitTeamMemberResponseDto) {
+
+        Member author = memberRepository.findByNickname(recruitTeamMemberResponseDto.getAuthor())
+                .orElseThrow(() -> new IllegalArgumentException("해당 작성자가 존재하지 않습니다."));
+
         // ResponseDto로부터 RecruitTeamMemberPost 객체 생성
-        Coordinate coordinate = recruitTeamMemberResponseDto.getCoordinateObject();// 문자열을 객체로 변환
+//        Coordinate coordinate = recruitTeamMemberResponseDto.getCoordinateObject();// 문자열을 객체로 변환
         // RequestDto로부터 RecruitTeamMemberPost 객체 생성
         RecruitTeamMemberPost recruitTeamMemberPost = RecruitTeamMemberPost.builder()
-//                .author(recruitTeamMemberResponseDto.getAuthor())
+                .author(author)
                 .title(recruitTeamMemberResponseDto.getTitle())
                 .content(recruitTeamMemberResponseDto.getContent())
                 .type(recruitTeamMemberResponseDto.getPart())
                 .category(recruitTeamMemberResponseDto.getField())
                 .region(recruitTeamMemberResponseDto.getRegion())
                 .recruitNum(recruitTeamMemberResponseDto.getRecruitNum())
-                .coordinate(coordinate)
+//                .coordinate(coordinate)
                 .timestamp(ZonedDateTime.now()) // 현재 시간으로 설정
                 .viewCount(0) // 초기 조회 수 설정
                 .build();

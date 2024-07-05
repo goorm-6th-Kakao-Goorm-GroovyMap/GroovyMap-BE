@@ -1,5 +1,6 @@
 package aespa.groovymap.recruitment.controller;
 
+import aespa.groovymap.config.SessionConstants;
 import aespa.groovymap.recruitment.dto.RecruitTeamMemberRequestDto;
 import aespa.groovymap.recruitment.dto.RecruitTeamMemberResponseDto;
 import aespa.groovymap.recruitment.service.RecruitTeamMemberService;
@@ -44,7 +45,8 @@ public class RecruitTeamMemberController {
     // 팀원 모집 글쓰기
     @Operation(summary = "팀원 모집 게시글 작성", description = "새로운 팀원 모집 목록 작성합니다.")
     @PostMapping(value = "/write", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> writeRecruitTeamMember(@ModelAttribute RecruitTeamMemberResponseDto recruitTeamMemberResponseDto) {
+    public ResponseEntity<?> writeRecruitTeamMember(@ModelAttribute RecruitTeamMemberResponseDto recruitTeamMemberResponseDto,
+                                                    @SessionAttribute(name = SessionConstants.MEMBER_ID, required = false) Long memberId) {
         try {
             RecruitTeamMemberRequestDto requestDto = recruitTeamMemberService.createRecruitTeamMember(recruitTeamMemberResponseDto);
             log.info("팀원 모집 게시글 등록 성공");
