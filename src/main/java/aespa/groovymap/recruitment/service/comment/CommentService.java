@@ -1,10 +1,10 @@
-package aespa.groovymap.recruitment.service;
+package aespa.groovymap.recruitment.service.comment;
 
 import aespa.groovymap.domain.Comment;
 import aespa.groovymap.domain.Member;
 import aespa.groovymap.domain.post.RecruitTeamMemberPost;
-import aespa.groovymap.recruitment.dto.CommentRequestDto;
-import aespa.groovymap.recruitment.dto.CommentResponseDto;
+import aespa.groovymap.recruitment.dto.comment.CommentRequestDto;
+import aespa.groovymap.recruitment.dto.comment.CommentResponseDto;
 import aespa.groovymap.recruitment.repository.RecruitTeamMemberRepository;
 import aespa.groovymap.repository.CommentRepository;
 import aespa.groovymap.repository.MemberRepository;
@@ -25,19 +25,19 @@ public class CommentService {
 
     @Transactional
     public CommentResponseDto addComment(CommentRequestDto commentRequestDto) {
-        if (commentRequestDto.getPostId() == null || commentRequestDto.getAuthorId() == null) {
+        if (commentRequestDto.getPostId() == null || commentRequestDto.getCommentAuthor() == null) {
             throw new IllegalArgumentException(
                     "Post ID와 Author ID는 null이 될 수 없습니다. postId: " + commentRequestDto.getPostId() + ", authorId: "
-                            + commentRequestDto.getAuthorId());
+                            + commentRequestDto.getCommentAuthor());
         }
 
         RecruitTeamMemberPost post = recruitTeamMemberRepository.findById(commentRequestDto.getPostId())
                 .orElseThrow(
                         () -> new IllegalArgumentException("잘못된 post ID입니다. postId: " + commentRequestDto.getPostId()));
 
-        Member author = memberRepository.findById(commentRequestDto.getAuthorId())
+        Member author = memberRepository.findByNickname(commentRequestDto.getCommentAuthor())
                 .orElseThrow(() -> new IllegalArgumentException(
-                        "잘못된 author ID입니다. authorId: " + commentRequestDto.getAuthorId()));
+                        "잘못된 author ID입니다. authorId: " + commentRequestDto.getCommentAuthor()));
 
         Comment comment = Comment.builder()
                 .commentPost(post)
@@ -47,6 +47,7 @@ public class CommentService {
                 .build();
 
         Comment savedComment = commentRepository.save(comment);
+        post.getComments().add(savedComment);
 
         return convertToResponseDto(savedComment);
     }
