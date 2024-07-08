@@ -19,10 +19,14 @@ import aespa.groovymap.upload.dto.UploadResultDto;
 import aespa.groovymap.upload.service.UpDownService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.Paths;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -34,6 +38,9 @@ import java.util.stream.Collectors;
 public class FreePostService {
 
     private String uploadPath = "C:/upload"; // 업로드 경로
+
+    @Value("${base.url}")
+    private String baseUrl;
 
     private final FreePostRepository freePostRepository;
     private final UpDownService updownService;
@@ -155,12 +162,6 @@ public class FreePostService {
                 .collect(Collectors.toList());
     }
 
-    // 홍보게시판 조회수 증가 메서드
-//    private void increaseViewCount(PromotionPost promotionPost) {
-//        promotionPost.setViewCount(promotionPost.getViewCount() + 1);
-//        promotionPostRepository.save(promotionPost); // 변경사항을 데이터베이스에 저장
-//    }
-
     // 자유 게시판 게시글 저장
     public void savePost(Long postId, Long memberId) {
         // 자유 게시판 게시글 조회
@@ -271,9 +272,11 @@ public class FreePostService {
         // S3에 업로드 된 파일 삭제 로직 추가
         List<String> fileNames = freePost.getImageSet().stream()
                 .map(image -> image.getFileName())
+                .map(fileName -> fileName.replace(baseUrl, ""))
                 .collect(Collectors.toList());
+
         String filesToDelete = String.join(",", fileNames);
-        Map<String, Boolean> deleteResults = updownService.removeFile(filesToDelete);
+        Map<String, Boolean> deleteResults = upDownService.removeFile(filesToDelete);
 
         // 삭제 결과 로그 출력
         deleteResults.forEach((fileName, success) -> {
