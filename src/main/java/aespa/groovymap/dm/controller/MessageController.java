@@ -6,11 +6,14 @@ import aespa.groovymap.dm.dto.SendMessageRequestDto;
 import aespa.groovymap.dm.service.MessageRoomService;
 import aespa.groovymap.dm.service.MessageService;
 import io.swagger.v3.oas.annotations.Operation;
+import java.security.Principal;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,6 +33,34 @@ public class MessageController {
     private final MessageService messageService;
     private final MessageRoomService messageRoomService;
     private final SimpMessagingTemplate messagingTemplate;
+
+    @MessageMapping("/chat")
+    public void sendMessage(@Payload SendMessageRequestDto messageDto, Principal principal) {
+        try {
+//            Long senderId = Long.parseLong(principal.getName());
+//            log.info(String.valueOf(senderId));
+//            messageDto.setSenderId(senderId); // 발신자 ID 설정
+            MessageDto savedMessage = messageService.processAndSendMessage(messageDto, principal);
+            savedMessage.setSentByMe(true);
+            log.info("메시지 전송 완료: {}", savedMessage);
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            log.warn("메시지 전송 실패: {}", e.getMessage());
+            sendErrorToUser(principal, e.getMessage());
+        } catch (Exception e) {
+            log.error("예상치 못한 오류 발생", e);
+            sendErrorToUser(principal, "메시지 처리 중 오류가 발생했습니다.");
+        }
+    }
+
+    private void sendErrorToUser(Principal principal, String errorMessage) {
+        if (principal != null) {
+            messagingTemplate.convertAndSendToUser(
+                    principal.getName(),
+                    "/queue/errors",
+                    errorMessage
+            );
+        }
+    }
 
     // HTTP POST 요청 처리
     @PostMapping("/send")
@@ -94,6 +125,25 @@ public class MessageController {
         } catch (Exception e) {
             log.error("메시지 조회 실패: nickname={}, memberId={}", nickname, memberId, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("메시지 조회 실패");
+        }
+    }
+
+    // 메시지 읽음 요청
+    @Operation(summary = "메시지 읽음 처리", description = "특정 메시지를 읽음 처리합니다.")
+    @PostMapping("/{messageId}/read")
+    public ResponseEntity<?> markMessageAsRead(@PathVariable Long messageId,
+                                               @SessionAttribute(name = SessionConstants.MEMBER_ID, required = false) Long memberId) {
+        if (memberId == null) {
+            log.error("로그인이 필요한 서비스입니다.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요한 서비스입니다.");
+        }
+        try {
+            messageService.markMessageAsRead(messageId, memberId);
+            log.info("메시지 읽음 처리 성공: messageId={}, memberId={}", messageId, memberId);
+            return ResponseEntity.ok("메시지 읽음 처리 성공");
+        } catch (Exception e) {
+            log.error("메시지 읽음 처리 실패: messageId={}, memberId={}", messageId, memberId, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("메시지 읽음 처리 실패");
         }
     }
 }

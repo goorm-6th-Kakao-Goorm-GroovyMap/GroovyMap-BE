@@ -17,4 +17,13 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     @Modifying
     @Query("UPDATE Message m SET m.isRead = true WHERE m.messageRoom.id = :messageRoomId AND m.isRead = false AND m.receiver.id = :receiverId")
     void markMessagesAsRead(@Param("messageRoomId") Long messageRoomId, @Param("receiverId") Long receiverId);
+
+    // 특정 메시지 방의 메시지를 시간순으로 조회하는 쿼리
+    @Query("SELECT m FROM Message m WHERE m.messageRoom.id = :messageRoomId ORDER BY m.timestamp")
+    List<Message> findMessagesByMessageRoomIdOrderedByTimestampAsc(Long messageRoomId);
+
+    // 특정 메시지를 읽음 처리하는 쿼리
+    @Modifying
+    @Query("UPDATE Message m SET m.isRead = true WHERE m.id = :messageId")
+    void markMessageAsRead(@Param("messageId") Long messageId);
 }
