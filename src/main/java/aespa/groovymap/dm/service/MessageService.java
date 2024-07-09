@@ -9,10 +9,14 @@ import aespa.groovymap.domain.MemberContent;
 import aespa.groovymap.domain.Message;
 import aespa.groovymap.domain.MessageRoom;
 import aespa.groovymap.repository.MemberRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.security.Principal;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -47,6 +51,8 @@ public class MessageService {
 
             // 수신자에게 메시지 전송
             sendMessageToUser(messageDto.getReceiverId(), savedMessage);
+            // 웹소켓을 통해 수신자에게 알림
+            notifyUser(messageDto.getReceiverId(), "새로운 메시지가 도착했습니다.");
 
             savedMessage.setSentByMe(true);
             // 발신자에게 메시지 전송
@@ -233,6 +239,20 @@ public class MessageService {
                 .isPresent()) {
             messageRepository.markMessageAsRead(messageId);
             log.info("메시지 읽음 처리 성공: 메시지 ID = {}, 수신자 ID = {}", messageId, receiverId);
+        }
+    }
+
+    public void notifyUser(Long userId, String messageContent) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, String> message = new HashMap<>();
+        message.put("content", messageContent);
+
+        try {
+            String jsonMessage = objectMapper.writeValueAsString(message);
+            messagingTemplate.convertAndSendToUser(userId.toString(), "/queue/notification", jsonMessage);
+            log.info("웹소켓을 통해 사용자 {}에게 새 메시지 알림 전송", userId);
+        } catch (JsonProcessingException e) {
+            log.error("JSON 처리 중 오류 발생", e);
         }
     }
 }

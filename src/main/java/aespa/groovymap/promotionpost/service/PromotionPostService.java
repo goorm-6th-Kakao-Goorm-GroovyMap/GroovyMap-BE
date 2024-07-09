@@ -279,20 +279,22 @@ public class PromotionPostService {
         savedPosts.forEach(savedPostRepository::delete);
 
         // S3에 업로드된 파일 삭제 로직 추가
-        List<String> fileNames = promotionPost.getImageSet().stream()
-                .map(image -> image.getFileName())
-                .collect(Collectors.toList());
-        String filesToDelete = String.join(",", fileNames);
-        Map<String, Boolean> deleteResults = upDownService.removeFile(filesToDelete);
+        if (!promotionPost.getImageSet().isEmpty()) {
+            List<String> fileNames = promotionPost.getImageSet().stream()
+                    .map(image -> image.getFileName())
+                    .collect(Collectors.toList());
+            String filesToDelete = String.join(",", fileNames);
+            Map<String, Boolean> deleteResults = upDownService.removeFile(filesToDelete);
 
-        // 삭제 결과 로그 출력
-        deleteResults.forEach((fileName, success) -> {
-            if (success) {
-                log.info("Deleted file from S3: {}", fileName);
-            } else {
-                log.error("Failed to delete file from S3: {}", fileName);
-            }
-        });
+            // 삭제 결과 로그 출력
+            deleteResults.forEach((fileName, success) -> {
+                if (success) {
+                    log.info("Deleted file from S3: {}", fileName);
+                } else {
+                    log.error("Failed to delete file from S3: {}", fileName);
+                }
+            });
+        }
 
         // 게시글 삭제
         promotionPostRepository.delete(promotionPost);
