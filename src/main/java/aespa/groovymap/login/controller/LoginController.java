@@ -23,6 +23,11 @@ public class LoginController {
 
     private final LoginService loginService;
 
+    @GetMapping("/")
+    public ResponseEntity test() {
+        return ResponseEntity.ok("");
+    }
+
     @PostMapping("/login")
     public ResponseEntity login(@RequestBody LoginDto loginDto, HttpServletRequest request) {
         log.info("로그인 시도");
