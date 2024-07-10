@@ -35,7 +35,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
-                .setAllowedOriginPatterns("http://localhost:3000", "http://groovymap.store")
+                .setAllowedOriginPatterns("http://localhost:3000", "http://groovymap.store",
+                        "https://groovy-map-git-develop-soyeons-projects-ec6b0062.vercel.app")
                 .addInterceptors(new HttpSessionHandshakeInterceptor())
                 .withSockJS();
         log.info("STOMP 엔드포인트 등록 완료: /ws");
