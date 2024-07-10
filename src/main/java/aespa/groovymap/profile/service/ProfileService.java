@@ -29,12 +29,8 @@ public class ProfileService {
             throw new IllegalArgumentException("이미 등록된 프로필이 존재합니다.");
         }
 
-        // 회원의 MemberContent가 null인 경우 초기화
+        // 회원의 MemberContent 조회
         MemberContent memberContent = member.getMemberContent();
-        if (memberContent == null) {
-            memberContent = new MemberContent();
-            member.setMemberContent(memberContent);
-        }
 
         // 회원의 introduction이 null일 경우 초기화
         if (memberContent.getIntroduction() == null) {
