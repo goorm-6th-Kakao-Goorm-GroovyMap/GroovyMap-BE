@@ -43,9 +43,9 @@ public class Post {
     @Lob
     @Column(columnDefinition = "TEXT")
     private String content;
-    private Integer likesCount;
-    private Integer savesCount;
-    private Integer viewCount;
+    private Integer likesCount = 0;
+    private Integer savesCount = 0;
+    private Integer viewCount = 0;
 
     @OneToMany(mappedBy = "commentPost", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments;

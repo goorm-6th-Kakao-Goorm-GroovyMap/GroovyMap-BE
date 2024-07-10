@@ -1,8 +1,8 @@
-package aespa.groovymap.recruitment.controller;
+package aespa.groovymap.freepost.controller.comment;
 
-import aespa.groovymap.recruitment.dto.CommentRequestDto;
-import aespa.groovymap.recruitment.dto.CommentResponseDto;
-import aespa.groovymap.recruitment.service.CommentService;
+import aespa.groovymap.freepost.dto.comment.FreePostCommentRequestDto;
+import aespa.groovymap.freepost.dto.comment.FreePostCommentResponseDto;
+import aespa.groovymap.freepost.service.comment.FreePostCommentService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,21 +16,21 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/recruitboard")
-public class CommentController {
+@RequestMapping("/freeboard")
+public class FreePostCommentController {
 
     @Autowired
-    private final CommentService commentService;
+    private final FreePostCommentService freePostCommentService;
 
     @Operation(summary = "댓글 추가", description = "새 댓글을 추가합니다.")
     @PostMapping("/{postId}/comment")
-    public ResponseEntity<?> addComment(@PathVariable Long postId, @RequestBody CommentRequestDto commentRequestDto) {
+    public ResponseEntity<?> addComment(@PathVariable Long postId, @RequestBody FreePostCommentRequestDto freePostCommentRequestDto) {
         try {
-            log.debug("Adding comment with postId: " + postId + ", authorId: " + commentRequestDto.getAuthorId());
-            commentRequestDto.setPostId(postId);
-            CommentResponseDto responseDto = commentService.addComment(commentRequestDto);
+            log.debug("Adding comment with postId: " + postId + ", commentAuthorId: " + freePostCommentRequestDto.getCommentAuthor());
+            freePostCommentRequestDto.setPostId(postId);
+            FreePostCommentResponseDto freePostCommentResponseDto = freePostCommentService.addComment(freePostCommentRequestDto);
             log.info("댓글 추가 성공");
-            return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
+            return new ResponseEntity<>(freePostCommentResponseDto, HttpStatus.CREATED);
         } catch (Exception e) {
             log.error("댓글 추가 실패", e);
             return new ResponseEntity<>("댓글 추가 실패", HttpStatus.BAD_REQUEST);
@@ -41,7 +41,7 @@ public class CommentController {
     @GetMapping("/{postId}/comment")
     public ResponseEntity<?> getCommentsByPostId(@PathVariable Long postId) {
         try {
-            List<CommentResponseDto> responseDtos = commentService.getCommentsByPostId(postId);
+            List<FreePostCommentResponseDto> responseDtos = freePostCommentService.getCommentsByPostId(postId);
             log.info("댓글 조회 성공");
             return ResponseEntity.ok().body(responseDtos);
         } catch (Exception e) {

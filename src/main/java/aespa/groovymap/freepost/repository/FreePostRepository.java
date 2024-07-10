@@ -22,5 +22,11 @@ public interface FreePostRepository extends JpaRepository<FreePost, Long> {
     @Query("update FreePost p set p.viewCount = p.viewCount + 1 where p.id = :id")
     int updateViews(@Param("id") Long id);
 
+    @Modifying
+    @Query("update FreePost p set p.savesCount = p.savesCount + 1 where p.id = :id")
+    int updateSaves(@Param("id") Long id);
 
+    @Modifying
+    @Query("update FreePost p set p.likesCount = p.likesCount + 1 where p.id = :id")
+    int updateLikes(@Param("id") Long id);
 }

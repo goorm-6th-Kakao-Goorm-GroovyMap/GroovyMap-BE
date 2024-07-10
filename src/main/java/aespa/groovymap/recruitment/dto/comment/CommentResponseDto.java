@@ -1,4 +1,4 @@
-package aespa.groovymap.recruitment.dto;
+package aespa.groovymap.recruitment.dto.comment;
 
 import aespa.groovymap.domain.Comment;
 import lombok.Builder;
