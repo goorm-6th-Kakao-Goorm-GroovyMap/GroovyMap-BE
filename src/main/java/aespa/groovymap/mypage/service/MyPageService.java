@@ -28,7 +28,7 @@ public class MyPageService {
 
     public MyPageInfoDto getMyPageInfo(String nickname) {
         Member member = memberRepository.findByNickname(nickname)
-                .orElseThrow(() -> new NoSuchElementException("Wrong Post Id"));
+                .orElseThrow(() -> new NoSuchElementException("마이페이지 정보 요청 api 해당 닉네임 가진 member 없음"));
         MemberContent memberContent = member.getMemberContent();
 
         MyPageInfoDto myPageInfoDto = new MyPageInfoDto();
@@ -54,11 +54,10 @@ public class MyPageService {
         myPageInfoDto.setIntroduction(memberContent.getIntroduction());
     }
 
-    public MyPageInfoUpdateResponseDto updateMyPageInfo(Long memberId,
-                                                        MyPageInfoUpdateRequestDto myPageInfoUpdateRequestDto)
-            throws IOException {
+    public MyPageInfoUpdateResponseDto updateMyPageInfo(MyPageInfoUpdateRequestDto myPageInfoUpdateRequestDto,
+                                                        Long memberId) throws IOException {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new NoSuchElementException("Wrong Post Id"));
+                .orElseThrow(() -> new NoSuchElementException("마이페이지 정보 수정 요청한 member가 없음"));
         MemberContent memberContent = member.getMemberContent();
         log.info("membercontent id = {}", memberContent.getId());
 
@@ -80,8 +79,7 @@ public class MyPageService {
     }
 
     private void setMemberContentInfo(MyPageInfoUpdateRequestDto myPageInfoUpdateRequestDto,
-                                      MemberContent memberContent)
-            throws IOException {
+                                      MemberContent memberContent) throws IOException {
         //memberContent.setProfileImage(fileUpload.saveFile(myPageInfoUpdateRequestDto.getProfileImage()));
         memberContent.setProfileImage(uploadFile(myPageInfoUpdateRequestDto.getProfileImage()));
         memberContent.setIntroduction(myPageInfoUpdateRequestDto.getIntroduction());

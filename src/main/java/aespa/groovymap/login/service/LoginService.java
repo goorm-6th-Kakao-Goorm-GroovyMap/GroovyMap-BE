@@ -24,7 +24,7 @@ public class LoginService {
 
     public MemberInfoDto getMemberInfo(Long memberId) {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new NoSuchElementException("Wrong Post Id"));
+                .orElseThrow(() -> new NoSuchElementException("/memberInfo api not login memberId"));
 
         MemberContent memberContent = member.getMemberContent();
 

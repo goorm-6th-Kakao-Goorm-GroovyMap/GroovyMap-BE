@@ -36,8 +36,8 @@ public class MyPageController {
         log.info("마이 페이지 정보 수정 요청 : {}", memberId);
         log.info("{}", myPageInfoUpdateRequestDto.getProfileImage());
         if (memberId != null) {
-            MyPageInfoUpdateResponseDto myPageInfoUpdateResponseDto = myPageService.updateMyPageInfo(memberId,
-                    myPageInfoUpdateRequestDto);
+            MyPageInfoUpdateResponseDto myPageInfoUpdateResponseDto = myPageService.updateMyPageInfo(
+                    myPageInfoUpdateRequestDto, memberId);
             return ResponseEntity.ok(myPageInfoUpdateResponseDto);
         }
         return ResponseEntity.badRequest().body("need login");
