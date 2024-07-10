@@ -131,6 +131,20 @@ public class MessageService {
                 .receiver(receiver)
                 .messages(new ArrayList<>())
                 .build();
+
+        // "채팅이 시작되었습니다." 메시지 생성 및 저장
+        Message message = Message.builder()
+                .sender(sender)
+                .receiver(receiver)
+                .contents("채팅이 시작되었습니다.")
+                .messageRoom(messageRoom)
+                .isRead(true)
+                .timestamp(ZonedDateTime.now())
+                .build();
+        Message welcomeMessage = messageRepository.save(message);
+
+        // 메시지 방에 메시지 추가
+        messageRoom.getMessages().add(welcomeMessage);
         messageRoomRepository.save(messageRoom);
         return messageRoom;
     }

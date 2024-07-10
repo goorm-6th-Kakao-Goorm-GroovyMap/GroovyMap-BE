@@ -1,12 +1,14 @@
 package aespa.groovymap.dm.service;
 
 import aespa.groovymap.dm.dto.MessageRoomDto;
+import aespa.groovymap.dm.repository.MessageRepository;
 import aespa.groovymap.dm.repository.MessageRoomRepository;
 import aespa.groovymap.domain.Member;
 import aespa.groovymap.domain.MemberContent;
 import aespa.groovymap.domain.Message;
 import aespa.groovymap.domain.MessageRoom;
 import aespa.groovymap.repository.MemberRepository;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,7 @@ public class MessageRoomService {
 
     private final MessageRoomRepository messageRoomRepository;
     private final MemberRepository memberRepository;
+    private final MessageRepository messageRepository;
 
     // 특정 회원이 속한 모든 메시지 방을 조회하여 DTO 리스트로 반환하는 메서드
     public List<MessageRoomDto> getMessageRooms(Long memberId) {
@@ -117,6 +120,20 @@ public class MessageRoomService {
                 .receiver(receiver)
                 .messages(new ArrayList<>())
                 .build();
+
+        // "채팅이 시작되었습니다." 메시지 생성 및 저장
+        Message message = Message.builder()
+                .sender(sender)
+                .receiver(receiver)
+                .contents("채팅이 시작되었습니다.")
+                .messageRoom(messageRoom)
+                .isRead(true)
+                .timestamp(ZonedDateTime.now())
+                .build();
+        Message welcomeMessage = messageRepository.save(message);
+
+        // 메시지 방에 메시지 추가
+        messageRoom.getMessages().add(welcomeMessage);
         messageRoomRepository.save(messageRoom);
         log.info("새 메시지 방 생성 - senderId: {}, receiverId: {}", senderId, receiverId);
         return messageRoom;
