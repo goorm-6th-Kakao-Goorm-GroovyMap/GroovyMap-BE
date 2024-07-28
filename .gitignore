@@ -37,7 +37,8 @@ out/
 .vscode/
 
 ### .properties file ###
-application-db.properties
+application-localdb.properties
+application-remotedb.properties
 application-email.properties
-application-file.properties
 application-s3.properties
+application-file.properties
