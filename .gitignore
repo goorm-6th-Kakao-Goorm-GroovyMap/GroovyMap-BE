@@ -42,3 +42,5 @@ application-remotedb.properties
 application-email.properties
 application-s3.properties
 application-file.properties
+application-dev.properties
+application-prod.properties
