@@ -2,6 +2,7 @@ package aespa.groovymap.oauth.controller;
 
 import aespa.groovymap.oauth.dto.KakaoLoginResponseDto;
 import aespa.groovymap.oauth.service.OAuthService;
+import aespa.groovymap.oauth.util.GoogleUtil;
 import aespa.groovymap.oauth.util.KakaoUtil;
 import aespa.groovymap.register.dto.RegisterRequestDto;
 import aespa.groovymap.register.dto.RegisterResponseDto;
@@ -22,20 +23,26 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class OAuthController {
 
     private final KakaoUtil kakaoUtil;
+    private final GoogleUtil googleUtil;
     private final OAuthService oauthService;
     private final RegisterService registerService;
 
     @GetMapping("/login/kakao")
     public String moveToKakaoLogin() {
-        String location = kakaoUtil.getKakaoUrl();
-
-        return "redirect:" + location;
+        String url = kakaoUtil.getKakaoUrl();
+        return "redirect:" + url;
     }
 
     @GetMapping("/kakao/callback")
     public ResponseEntity loginByKakao(@RequestParam("code") String code, HttpServletRequest request) {
         KakaoLoginResponseDto kakaoLoginResponseDto = oauthService.loginByKakao(code, request);
         return ResponseEntity.ok(kakaoLoginResponseDto);
+    }
+
+    @GetMapping("/login/google")
+    public String moveToGoogleLogin() {
+        String url = googleUtil.getGoogleUrl();
+        return "redirect:" + url;
     }
 
     @GetMapping("/login/oauth/register")

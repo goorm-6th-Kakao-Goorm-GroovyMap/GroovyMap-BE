@@ -45,3 +45,4 @@ application-file.properties
 application-dev.properties
 application-prod.properties
 application-kakao.properties
+application-google.properties
