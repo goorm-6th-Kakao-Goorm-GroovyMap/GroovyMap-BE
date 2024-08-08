@@ -1,6 +1,6 @@
 package aespa.groovymap.oauth.util;
 
-import aespa.groovymap.oauth.dto.KakaoDto;
+import aespa.groovymap.oauth.dto.OAuthLoginInfoDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,6 +25,9 @@ public class KakaoUtil {
     @Value("${kakao.client.id}")
     private String client_id;
 
+    @Value("${kakao.client.secret")
+    private String client_secret;
+
     @Value("${kakao.redirect.uri}")
     private String redirect_uri;
 
@@ -46,6 +49,7 @@ public class KakaoUtil {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "authorization_code"); //고정값
         params.add("client_id", client_id);
+        params.add("client_secret", client_secret);
         params.add("redirect_uri", redirect_uri); //등록한 redirect uri
         params.add("code", code);
 
@@ -70,7 +74,7 @@ public class KakaoUtil {
         return accessToken;
     }
 
-    public KakaoDto getUserInfoWithToken(String accessToken) throws JsonProcessingException {
+    public OAuthLoginInfoDto getUserInfoWithToken(String accessToken) throws JsonProcessingException {
         String nickname = "";
         String email = "";
         String reqUrl = "https://kapi.kakao.com/v2/user/me";
@@ -78,6 +82,7 @@ public class KakaoUtil {
         //1. HttpHeader 생성
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + accessToken);
+        headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
 
         //2. HttpHeader 담기
         HttpEntity<MultiValueMap<String, String>> httpEntity = new HttpEntity<>(headers);
@@ -86,7 +91,7 @@ public class KakaoUtil {
         RestTemplate rt = new RestTemplate();
         ResponseEntity<String> response = rt.exchange(
                 reqUrl,
-                HttpMethod.GET,
+                HttpMethod.POST,
                 httpEntity,
                 String.class
         );
@@ -101,6 +106,6 @@ public class KakaoUtil {
         email = kakaoAccount.path("email").asText(); // asText 사용, 없으면 빈 문자열 반환
         nickname = profile.path("nickname").asText(); // asText 사용, 없으면 빈 문자열 반환
 
-        return new KakaoDto(nickname, email);
+        return new OAuthLoginInfoDto(nickname, email);
     }
 }

@@ -1,6 +1,9 @@
 package aespa.groovymap.oauth.controller;
 
-import aespa.groovymap.oauth.dto.KakaoLoginResponseDto;
+import static aespa.groovymap.oauth.util.OAuthType.GOOGLE;
+import static aespa.groovymap.oauth.util.OAuthType.KAKAO;
+
+import aespa.groovymap.oauth.dto.OAuthLoginResponseDto;
 import aespa.groovymap.oauth.service.OAuthService;
 import aespa.groovymap.oauth.util.GoogleUtil;
 import aespa.groovymap.oauth.util.KakaoUtil;
@@ -35,14 +38,20 @@ public class OAuthController {
 
     @GetMapping("/kakao/callback")
     public ResponseEntity loginByKakao(@RequestParam("code") String code, HttpServletRequest request) {
-        KakaoLoginResponseDto kakaoLoginResponseDto = oauthService.loginByKakao(code, request);
-        return ResponseEntity.ok(kakaoLoginResponseDto);
+        OAuthLoginResponseDto OAuthLoginResponseDto = oauthService.loginByOAuth(code, request, KAKAO);
+        return ResponseEntity.ok(OAuthLoginResponseDto);
     }
 
     @GetMapping("/login/google")
     public String moveToGoogleLogin() {
         String url = googleUtil.getGoogleUrl();
         return "redirect:" + url;
+    }
+
+    @GetMapping("/google/callback")
+    public ResponseEntity loginByGoogle(@RequestParam("code") String code, HttpServletRequest request) {
+        OAuthLoginResponseDto OAuthLoginResponseDto = oauthService.loginByOAuth(code, request, GOOGLE);
+        return ResponseEntity.ok(OAuthLoginResponseDto);
     }
 
     @GetMapping("/login/oauth/register")

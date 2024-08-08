@@ -5,13 +5,17 @@ import static aespa.groovymap.oauth.util.LoginStatus.LOGIN_SUCCESS;
 import static aespa.groovymap.oauth.util.LoginStatus.NEED_REGISTER;
 import static aespa.groovymap.oauth.util.LoginStatus.SAME_EMAIL;
 import static aespa.groovymap.oauth.util.LoginStatus.SAME_NICKNAME;
+import static aespa.groovymap.oauth.util.OAuthType.GOOGLE;
+import static aespa.groovymap.oauth.util.OAuthType.KAKAO;
 
 import aespa.groovymap.config.SessionConstants;
 import aespa.groovymap.domain.Member;
-import aespa.groovymap.oauth.dto.KakaoDto;
-import aespa.groovymap.oauth.dto.KakaoLoginResponseDto;
+import aespa.groovymap.oauth.dto.OAuthLoginInfoDto;
+import aespa.groovymap.oauth.dto.OAuthLoginResponseDto;
+import aespa.groovymap.oauth.util.GoogleUtil;
 import aespa.groovymap.oauth.util.KakaoUtil;
 import aespa.groovymap.oauth.util.LoginStatus;
+import aespa.groovymap.oauth.util.OAuthType;
 import aespa.groovymap.repository.MemberRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,43 +32,56 @@ import org.springframework.transaction.annotation.Transactional;
 public class OAuthService {
 
     private final KakaoUtil kakaoUtil;
+    private final GoogleUtil googleUtil;
     private final MemberRepository memberRepository;
 
-    public KakaoLoginResponseDto loginByKakao(String code, HttpServletRequest request) {
-        KakaoLoginResponseDto kakaoLoginResponseDto = new KakaoLoginResponseDto();
+    public OAuthLoginResponseDto loginByOAuth(String code, HttpServletRequest request, OAuthType oauthType) {
 
         try {
-            String accessToken = kakaoUtil.getAccessToken(code);
-            KakaoDto kakaoDto = kakaoUtil.getUserInfoWithToken(accessToken);
-            LoginStatus loginStatus = checkMemberRegistration(kakaoDto, request);
-
-            kakaoLoginResponseDto.setEmail(kakaoDto.getEmail());
-            kakaoLoginResponseDto.setNickname(kakaoDto.getNickname());
-            kakaoLoginResponseDto.setLoginStatus(loginStatus);
-
-            return kakaoLoginResponseDto;
+            OAuthLoginInfoDto OAuthLoginInfoDto = getOAuthLoginInfoDto(code, oauthType);
+            LoginStatus loginStatus = checkMemberRegistration(OAuthLoginInfoDto, request);
+            log.info(OAuthLoginInfoDto.getEmail() + " " + OAuthLoginInfoDto.getNickname() + " " + loginStatus);
+            return makeOAuthResponse(OAuthLoginInfoDto, loginStatus);
         } catch (JsonProcessingException e) {
-            log.info("카카오 로그인 예외로 실패");
-            kakaoLoginResponseDto.setEmail("");
-            kakaoLoginResponseDto.setNickname("");
-            kakaoLoginResponseDto.setLoginStatus(LOGIN_FAIL);
-            return kakaoLoginResponseDto;
+            log.info(oauthType + " 로그인 예외로 실패");
+            return makeOAuthResponse(new OAuthLoginInfoDto("", ""), LOGIN_FAIL);
         }
     }
 
-    private LoginStatus checkMemberRegistration(KakaoDto kakaoDto, HttpServletRequest request) {
+    private OAuthLoginInfoDto getOAuthLoginInfoDto(String code, OAuthType oauthType) throws JsonProcessingException {
+        String accessToken;
+        OAuthLoginInfoDto OAuthLoginInfoDto = null;
+        if (oauthType == KAKAO) {
+            accessToken = kakaoUtil.getAccessToken(code);
+            OAuthLoginInfoDto = kakaoUtil.getUserInfoWithToken(accessToken);
+        } else if (oauthType == GOOGLE) {
+            accessToken = googleUtil.getAccessToken(code);
+            OAuthLoginInfoDto = googleUtil.getUserInfoWithToken(accessToken);
+        }
+        return OAuthLoginInfoDto;
+    }
 
-        if (memberRepository.findByEmail(kakaoDto.getEmail()).isPresent()) {
-            return checkSameEmail(kakaoDto, request);
+    private OAuthLoginResponseDto makeOAuthResponse(OAuthLoginInfoDto oAuthLoginInfoDto, LoginStatus loginStatus) {
+        OAuthLoginResponseDto oAuthLoginResponseDto = new OAuthLoginResponseDto();
+        oAuthLoginResponseDto.setEmail(oAuthLoginInfoDto.getEmail());
+        oAuthLoginResponseDto.setNickname(oAuthLoginInfoDto.getNickname());
+        oAuthLoginResponseDto.setLoginStatus(loginStatus);
+        return oAuthLoginResponseDto;
+    }
+
+    private LoginStatus checkMemberRegistration(OAuthLoginInfoDto OAuthLoginInfoDto, HttpServletRequest request) {
+
+        if (memberRepository.findByEmail(OAuthLoginInfoDto.getEmail()).isPresent()) {
+            return checkSameEmail(OAuthLoginInfoDto, request);
         } else {
-            return checkSameNickname(kakaoDto);
+            return checkSameNickname(OAuthLoginInfoDto);
         }
     }
 
-    private LoginStatus checkSameEmail(KakaoDto kakaoDto, HttpServletRequest request) {
-        Member sameEmailMember = memberRepository.findByEmail(kakaoDto.getEmail()).get();
+    private LoginStatus checkSameEmail(OAuthLoginInfoDto OAuthLoginInfoDto, HttpServletRequest request) {
+        Member sameEmailMember = memberRepository.findByEmail(OAuthLoginInfoDto.getEmail()).get();
 
-        if (sameEmailMember.getPassword().equals(kakaoDto.getNickname())) {
+        if (sameEmailMember.getPassword().equals(OAuthLoginInfoDto.getNickname())) {
             HttpSession session = request.getSession();
             session.setAttribute(SessionConstants.MEMBER_ID, sameEmailMember.getId());
             return LOGIN_SUCCESS;
@@ -73,8 +90,8 @@ public class OAuthService {
         }
     }
 
-    private LoginStatus checkSameNickname(KakaoDto kakaoDto) {
-        if (memberRepository.findByNickname(kakaoDto.getNickname()).isPresent()) {
+    private LoginStatus checkSameNickname(OAuthLoginInfoDto OAuthLoginInfoDto) {
+        if (memberRepository.findByNickname(OAuthLoginInfoDto.getNickname()).isPresent()) {
             return SAME_NICKNAME;
         } else {
             return NEED_REGISTER;
