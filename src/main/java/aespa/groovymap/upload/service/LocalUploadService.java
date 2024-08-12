@@ -15,19 +15,17 @@ import java.util.Map;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnailator;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 
 
-@Service
+//@Service
 @Slf4j
-@Profile("local")
+//@Profile("local")
 public class LocalUploadService implements UpDownService {
 
     private String uploadPath = "C:\\upload"; // 업로드 경로

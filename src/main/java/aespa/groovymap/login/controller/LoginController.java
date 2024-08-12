@@ -23,12 +23,18 @@ public class LoginController {
 
     private final LoginService loginService;
 
+    @GetMapping("/")
+    public ResponseEntity test() {
+        return ResponseEntity.ok("");
+    }
+
     @PostMapping("/login")
     public ResponseEntity login(@RequestBody LoginDto loginDto, HttpServletRequest request) {
         log.info("로그인 시도");
         Member loginMember = loginService.login(loginDto.getEmail(), loginDto.getPassword());
 
         if (loginMember == null) {
+            log.info("로그인 실패");
             return ResponseEntity.badRequest().body(false);
         }
 
@@ -39,6 +45,7 @@ public class LoginController {
 
     @PostMapping("/logout")
     public ResponseEntity logout(HttpServletRequest request) {
+        log.info("로그인");
         HttpSession session = request.getSession(false);
         if (session != null) {
             session.invalidate();
