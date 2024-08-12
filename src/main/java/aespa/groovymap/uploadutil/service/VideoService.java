@@ -6,13 +6,12 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRange;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
+//@Service
 @Transactional
 public class VideoService {
-    
+
     public ResourceRegion getMp4ResourceRegion(UrlResource video, HttpHeaders headers) throws IOException {
         final long chunkSize = 1000000L;
         long contentLength = video.contentLength();
