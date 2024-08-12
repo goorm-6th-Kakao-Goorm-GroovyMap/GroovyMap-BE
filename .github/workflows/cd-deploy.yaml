@@ -23,7 +23,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: build project
-        run: ./gradlew clean build
+        run: ./gradlew clean build -Dspring.profiles.active=test
 
       - name: copy jar to server
         uses: appleboy/scp-action@master
