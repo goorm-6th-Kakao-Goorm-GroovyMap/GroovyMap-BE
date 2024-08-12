@@ -2,14 +2,13 @@ package aespa.groovymap.uploadutil.util;
 
 import java.io.File;
 import java.io.IOException;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.multipart.MultipartFile;
 
 //@Component
 //@PropertySource("classpath:application-file.properties")
 public class LocalFileUpload implements FileUpload {
 
-    @Value("${file.dir}")
+    //    @Value("${file.dir}")
     private String fileDir;
 
     public String getFullPath(String filename) {
