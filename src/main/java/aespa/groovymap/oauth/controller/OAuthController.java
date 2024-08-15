@@ -3,6 +3,7 @@ package aespa.groovymap.oauth.controller;
 import static aespa.groovymap.oauth.util.OAuthType.GOOGLE;
 import static aespa.groovymap.oauth.util.OAuthType.KAKAO;
 
+import aespa.groovymap.oauth.dto.OAuthLoginRequestDto;
 import aespa.groovymap.oauth.dto.OAuthLoginResponseDto;
 import aespa.groovymap.oauth.service.OAuthService;
 import aespa.groovymap.oauth.util.GoogleUtil;
@@ -17,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -36,9 +38,17 @@ public class OAuthController {
         return "redirect:" + url;
     }
 
-    @GetMapping("/kakao/callback")
+    //@GetMapping("/kakao/callback")
     public ResponseEntity loginByKakao(@RequestParam("code") String code, HttpServletRequest request) {
         OAuthLoginResponseDto OAuthLoginResponseDto = oauthService.loginByOAuth(code, request, KAKAO);
+        return ResponseEntity.ok(OAuthLoginResponseDto);
+    }
+
+    @PostMapping("/kakao/callback")
+    public ResponseEntity loginByKakaos(HttpServletRequest request,
+                                        @RequestBody OAuthLoginRequestDto oAuthLoginRequestDto) {
+        OAuthLoginResponseDto OAuthLoginResponseDto
+                = oauthService.loginByOAuth(oAuthLoginRequestDto.getCode(), request, KAKAO);
         return ResponseEntity.ok(OAuthLoginResponseDto);
     }
 
@@ -48,8 +58,16 @@ public class OAuthController {
         return "redirect:" + url;
     }
 
-    @GetMapping("/google/callback")
-    public ResponseEntity loginByGoogle(@RequestParam("code") String code, HttpServletRequest request) {
+    //@GetMapping("/google/callback")
+    public ResponseEntity loginByGoogle(HttpServletRequest request,
+                                        @RequestBody OAuthLoginRequestDto oAuthLoginRequestDto) {
+        OAuthLoginResponseDto OAuthLoginResponseDto
+                = oauthService.loginByOAuth(oAuthLoginRequestDto.getCode(), request, GOOGLE);
+        return ResponseEntity.ok(OAuthLoginResponseDto);
+    }
+
+    @PostMapping("/google/callback")
+    public ResponseEntity loginByGoogles(@RequestParam("code") String code, HttpServletRequest request) {
         OAuthLoginResponseDto OAuthLoginResponseDto = oauthService.loginByOAuth(code, request, GOOGLE);
         return ResponseEntity.ok(OAuthLoginResponseDto);
     }
